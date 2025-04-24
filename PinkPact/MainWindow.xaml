@@ -1,0 +1,244 @@
+﻿<Window x:Class="PinkPact.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PinkPact"
+        xmlns:ctr="clr-namespace:PinkPact.Controls"
+        xmlns:cnv="clr-namespace:PinkPact.Converters"
+        xmlns:efc="clr-namespace:PinkPact.Shaders"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        UseLayoutRounding="True"
+        Title="The Pink Pact"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="WidthAndHeight"
+        x:Name="mainWindow">
+    <Window.Resources>
+        <ResourceDictionary>
+            <cnv:PointConverter x:Key="point"/>
+            <cnv:ArithmeticConverter x:Key="math"/>
+            <cnv:PathConverter x:Key="path"/>
+            
+            <FontFamily x:Key="ipixelu">/Resources/Fonts/#I pixel u</FontFamily>
+            <FontFamily x:Key="sd_auto_pilot">/Resources/Fonts/#SD Auto Pilot</FontFamily>
+            <FontFamily x:Key="mini_pixel">/Resources/Fonts/#Mini Pixel-7</FontFamily>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Border x:Name="mainBorder"
+            BorderBrush="Black"
+            BorderThickness="4">
+        <Grid x:Name="mainGrid"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Center"
+              Background="#fef8f6"
+              Width="950"
+              Height="568">
+            
+            <Grid x:Name="bgDecorator">
+                <Polygon VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Points="0 0 0 1 -1 1"
+                    Fill="#ca4b78">
+                    <Polygon.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding ElementName=mainGrid, Path=Width}"
+                                    ScaleY="{Binding ElementName=mainGrid, Path=Height}"/>
+                    </Polygon.RenderTransform>
+                </Polygon>
+                <Rectangle Fill="#fdedee"
+                       Width="{Binding ElementName=mainGrid, Path=Width}"
+                       Height="{Binding ElementName=mainGrid, Path=Height}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       RenderTransformOrigin="0.5,0.5">
+                    <Rectangle.RenderTransform>
+                        <ScaleTransform ScaleX="0.99"
+                                    ScaleY="0.99"/>
+                    </Rectangle.RenderTransform>
+                </Rectangle>
+            </Grid>
+            <Grid x:Name="windowBar"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top"
+                  Margin="2.5,5,5,0"
+                  Height="25">
+                <Grid.Width>
+                    <MultiBinding Converter="{StaticResource math}"
+                                  ConverterParameter="f{0}-15">
+                        <Binding ElementName="mainGrid"
+                                 Path="Width"/>
+                    </MultiBinding>
+                </Grid.Width>
+                <Rectangle x:Name="dragBar"
+                           Fill="#feaab9">
+                </Rectangle>
+                <TextBlock Text="THE PINK PACT"
+                           Margin="30,-2,0,0"
+                           FontSize="20"
+                           IsHitTestVisible="False"
+                           FontFamily="{StaticResource ipixelu}"
+                           Foreground="#fdfcf9">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="0"
+                                          Direction="-120"
+                                          ShadowDepth="3"
+                                          RenderingBias="Quality"
+                                          Color="#ce467f"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <Image Margin="3,3,0,2"
+                       Stretch="Uniform"
+                       Source="/Resources/mini_logo.png"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       HorizontalAlignment="Left"
+                       Width="20"
+                       Height="20"/>
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,2,2">
+                    <ctr:ImageButton x:Name="minBtn"
+                                     Image="/Resources/min_btn.png"
+                                     HoldImage="/Resources/min_btn_hold.png"
+                                     HoverImage="/Resources/min_btn_hover.png"
+                                     Width="20"
+                                     Height="20"
+                                     Margin="0,0,3,0">
+                        <ctr:ImageButton.Effect>
+                            <DropShadowEffect BlurRadius="0"
+                                              ShadowDepth="2"
+                                              Direction="-120"
+                                              Color="#ce467f"
+                                              RenderingBias="Quality"/>
+                        </ctr:ImageButton.Effect>
+                    </ctr:ImageButton>
+                    <ctr:ImageButton x:Name="maxBtn"
+                                     Image="/Resources/max_btn.png"
+                                     HoldImage="/Resources/max_btn_hold.png"
+                                     HoverImage="/Resources/max_btn_hover.png"
+                                     Width="20"
+                                     Height="20"
+                                     Margin="0,0,3,0">
+                        <ctr:ImageButton.Effect>
+                            <DropShadowEffect BlurRadius="0"
+                                          ShadowDepth="2"
+                                          Direction="-120"
+                                          Color="#ce467f"
+                                          RenderingBias="Quality"/>
+                        </ctr:ImageButton.Effect>
+                    </ctr:ImageButton>
+                    <ctr:ImageButton x:Name="exitBtn"
+                                     Image="/Resources/exit_btn.png"
+                                     HoldImage="/Resources/exit_btn_hold.png"
+                                     HoverImage="/Resources/exit_btn_hover.png"
+                                     Width="20"
+                                     Height="20">
+                        <ctr:ImageButton.Effect>
+                            <DropShadowEffect BlurRadius="0"
+                                          ShadowDepth="2"
+                                          Direction="-120"
+                                          Color="#ce467f"
+                                          RenderingBias="Quality"/>
+                        </ctr:ImageButton.Effect>
+                    </ctr:ImageButton>
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="viewport"
+                  VerticalAlignment="Center"
+                  HorizontalAlignment="Center"
+                  ClipToBounds="True"
+                  Width="1920"
+                  Height="1080"
+                  Margin="-3,35,0,8"
+                  RenderTransformOrigin="0.5,0.5"
+                  Background="Black">
+                <Grid.LayoutTransform>
+                    <ScaleTransform x:Name="viewportScale"
+                                    ScaleX="0.487"
+                                    ScaleY="0.487"/>
+                </Grid.LayoutTransform>
+
+                <Grid x:Name="game_layer"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Center"
+                      ClipToBounds="True"
+                      Width="{Binding Width, ElementName=viewport}"
+                      Height="{Binding Height, ElementName=viewport}"
+                      RenderTransformOrigin="0.5,0.5"
+                      Background="Transparent">
+
+                    <Grid.Effect>
+                        <efc:StripeEffect Height="4.5"
+                                          Opacity="0.06"
+                                          Color="White"/>
+                    </Grid.Effect>
+
+                    <ctr:FormattedTextBlock x:Name="format"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Text="(w8,ff`Mini Pixel-7`,c#ff0048-#ff0000,lff`SD Auto Pilot`)[PINK]"
+                                        TextWrapping="Wrap"
+                                        FadingDuration="50"
+                                        FontFamily="{StaticResource mini_pixel}"
+                                        Foreground="White"
+                                        FontSize="150"/>
+
+                </Grid>
+
+                <Grid x:Name="ui_layer"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Center"
+                      ClipToBounds="True"
+                      Width="{Binding Width, ElementName=viewport}"
+                      Height="{Binding Height, ElementName=viewport}"
+                      RenderTransformOrigin="0.5,0.5"
+                      Background="Transparent">
+                </Grid>
+
+                <StackPanel x:Name="viewportButtons" 
+                           Orientation="Horizontal"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Right"
+                           Visibility="Collapsed"
+                           Opacity="0.7"
+                           Margin="0,10,10,0">
+                    <ctr:ImageButton x:Name="minBtnVP"
+                                    Image="/Resources/min_btn_subtle.png"
+                                    HoverImage="/Resources/min_subtle_hold.png"
+                                    HoldImage="/Resources/min_subtle_hold.png"
+                                    ScalingMode="NearestNeighbor"
+                                    Width="20"
+                                    Height="10"
+                                    Margin="0,0,10,0">
+                    </ctr:ImageButton>
+                    <ctr:ImageButton x:Name="maxBtnVP"
+                                    Image="/Resources/max_btn_subtle.png"
+                                    HoverImage="/Resources/max_subtle_hold.png"
+                                    HoldImage="/Resources/max_subtle_hold.png"
+                                    Width="20"
+                                    Height="20"
+                                    Margin="0,0,10,0">
+                    </ctr:ImageButton>
+                    <ctr:ImageButton x:Name="exitBtnVP"
+                                    Image="/Resources/exit_btn_subtle.png"
+                                    HoverImage="/Resources/exit_subtle_hold.png"
+                                    HoldImage="/Resources/exit_subtle_hold.png"
+                                    Width="20"
+                                    Height="20">
+                    </ctr:ImageButton>
+                </StackPanel>
+
+            </Grid>
+        </Grid>
+        <Border.LayoutTransform>
+            <ScaleTransform x:Name="windowScale"
+                            ScaleX="1"
+                            ScaleY="1"/>
+        </Border.LayoutTransform>
+    </Border>
+</Window>

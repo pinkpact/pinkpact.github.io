@@ -64,6 +64,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Animations\RandomDoubleAnimation.cs" />
+    <Compile Include="Controls\DrawingVisualHost.cs" />
     <Compile Include="Controls\FormattedTextBlock.cs" />
     <Compile Include="Controls\GifImage.cs" />
     <Compile Include="Controls\GifImageButton.xaml.cs">
@@ -72,6 +73,7 @@
     <Compile Include="Controls\ImageButton.xaml.cs">
       <DependentUpon>ImageButton.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TrailGroup.cs" />
     <Compile Include="Converters\ArithmeticConverter.cs" />
     <Compile Include="Converters\ConditionalConverter.cs" />
     <Compile Include="Converters\PathConverter.cs" />

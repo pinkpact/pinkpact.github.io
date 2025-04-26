@@ -171,13 +171,7 @@
                       Height="{Binding Height, ElementName=viewport}"
                       RenderTransformOrigin="0.5,0.5"
                       Background="Transparent">
-
-                    <Grid.Effect>
-                        <efc:StripeEffect Height="4.5"
-                                          Opacity="0.06"
-                                          Color="White"/>
-                    </Grid.Effect>
-
+                    
                     <ctr:FormattedTextBlock x:Name="format"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"

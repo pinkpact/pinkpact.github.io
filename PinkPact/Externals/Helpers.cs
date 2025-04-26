@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Windows.Media.Effects;
 using System.Collections.Generic;
-using System.Windows.Documents;
 using System.Windows.Controls;
 using System.Threading.Tasks;
 using System.Windows.Interop;
@@ -29,8 +28,8 @@ using System;
 using static PinkPact.PInvoke;
 
 using PinkPact.Shaders;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
-
+using PinkPact.Controls;
+using PinkPact.Animations;
 
 namespace PinkPact.Helpers
 {
@@ -147,46 +146,183 @@ namespace PinkPact.Helpers
         }
 
         /// <summary>
-        /// Checks if the mouse is within a minimum distance of (<paramref name="dX"/>, <paramref name="dY"/>) units from <paramref name="element"/>.
+        /// Gets the location of <paramref name="element"/> relative to its parent.
         /// </summary>
-        /// <returns><see langword="true"/> is the mouse is over the element or within the speicifed distance, <see langword="false"/> otherwise.</returns>
-        public static bool IsMouseNear(this FrameworkElement element, double dX, double dY)
+        public static Point RelativeLocation(this FrameworkElement element)
         {
-            if (element == null || !element.IsVisible) return false;
-
-            // Get mouse position relative to the element
-            Point mousePos = Mouse.GetPosition(element);
-
-            // Check if mouse is directly over the element
-            if (element.InputHitTest(mousePos) != null) return true;
-
-            // Get the actual bounds of the element
-            var bounds = new Rect(0, 0, element.ActualWidth, element.ActualHeight);
-            bounds.Inflate(dX, dY);
-
-            return bounds.Contains(mousePos);
+            var container = VisualTreeHelper.GetParent(element) as UIElement;
+            return element.TranslatePoint(new Point(0, 0), container);
         }
 
-        public static bool IsMouseNear(this Run element, double dX, double dY)
+        /// <summary>
+        /// Fades <paramref name="element"/> out over a period of time, then removes it as a child from its parent.
+        /// </summary>
+        public static async Task FadeOut(this FrameworkElement element, TimeSpan duration, EasingFunctionBase easingFunction = null)
         {
-            if (element is null || !(element?.Parent is TextBlock parent) || !parent.IsVisible) return false;
+            var anim = new DoubleAnimation(element.Opacity, 0, duration) { EasingFunction = easingFunction };
+            element.BeginAnimation(FrameworkElement.OpacityProperty, anim);
 
-            // Get mouse position relative to the element
-            var mousePos = Mouse.GetPosition(element);
-
-            // Get the actual bounds of the element
-            var textSize = parent.MeasureString(element.Text, element.FontSize, element.FontFamily, element.FontStyle, element.FontWeight, element.FontStretch);
-            var bounds = new Rect(-dX, -dY, textSize.Width + dX, textSize.Height + dY);
-
-            return bounds.Contains(mousePos);
+            await Task.Delay(duration);
+            (VisualTreeHelper.GetParent(element) as FrameworkElement).RemoveChild(element);
         }
 
-        public static Rect GetRunBounds(this Run element)
+        /// <summary>
+        /// Draws the visual represented by <paramref name="element"/> on a <see cref="DrawingVisualHost"/> at the location <paramref name="location"/>.
+        /// </summary>
+        public static DrawingContext DrawVisual(this DrawingVisualHost drawing, FrameworkElement element, Point location)
         {
-            if (element is null || !(element?.Parent is TextBlock parent) || !parent.IsVisible) return default;
+            var brush = new VisualBrush(element);
+            var dc = drawing.Visual.RenderOpen();
 
-            var textSize = parent.MeasureString(element.Text, element.FontSize, element.FontFamily, element.FontStyle, element.FontWeight, element.FontStretch);
-            return new Rect(0, 0, textSize.Width, textSize.Height);
+            dc.DrawRectangle(brush, null, new Rect(location.X, location.Y, element.ActualWidth, element.ActualHeight));
+
+            return dc;
+        }
+
+        /// <summary>
+        /// Toggles a trail for <paramref name="element"/>, meaning every time <paramref name="element"/> updates its position, it will leave a trail behind it.
+        /// <para> To toggle the trail on/off, call this method on either the original <see cref="FrameworkElement"/>, or a previously returned <see cref="TrailGroup"/>.<br/>When toggled on, <paramref name="element"/> will be replaced as the child of its parent with a <see cref="TrailGroup"/>.<br/>Inversely, when toggled off, the parent will regain the original <see cref="FrameworkElement"/> as its child at its orignal index.</para>
+        /// <para>Note: calling this method on a <see cref="TrailGroup"/> will always toggle the trail off.</para>
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static TrailGroup ToggleTrailing(this FrameworkElement element, TimeSpan cooldown = default, TimeSpan fadeDuration = default)
+        {
+            // Set up the position checker
+
+            TrailGroup group = null;
+            void positionChecker(object sender, EventArgs e)
+            {
+                // Check whether the position has changed (and the cooldown is over)
+
+                if (group.timer.Elapsed < group.TrailCooldown ||
+                    element.RelativeLocation() == group.lastPosition)
+                    
+                    return;
+
+                // Setup the new visual drawing
+
+                var host = new DrawingVisualHost(new DrawingVisual()) 
+                {
+                    Width = element.Width,
+                    Height = element.Height,
+                    Margin = element.Margin,
+                    Opacity = element.Opacity / 2,
+                    RenderTransform = element.RenderTransform,
+                    LayoutTransform = element.LayoutTransform,
+                    RenderTransformOrigin = element.RenderTransformOrigin,
+                    HorizontalAlignment = element.HorizontalAlignment,
+                    VerticalAlignment = element.VerticalAlignment,
+                };
+                
+                // Insert the visual as the first child (meaning it will be shown at the bottom), draw it, and fade it out
+
+                group.Children.Insert(0, host);
+                host.DrawVisual(element, new Point(-element.ActualWidth / 2, -element.ActualHeight / 2)).Close();
+                _ = host.FadeOut(group.FadeDuration, new SineEase() { EasingMode = EasingMode.EaseOut });
+
+                // Restart the cooldown and update the position
+
+                group.lastPosition = element.RelativeLocation();
+                group.timer.Restart();
+            }
+
+            // Check if toggle off (element is a TrailGroup or it has a TrailGroup parent)
+
+            if (element is TrailGroup || VisualTreeHelper.GetParent(element) is TrailGroup)
+            {
+                // Clear the group and find the index in the parent
+
+                group = element is TrailGroup ? element as TrailGroup : VisualTreeHelper.GetParent(element) as TrailGroup;
+                group.Children.Clear();
+
+                var parent = VisualTreeHelper.GetParent(group) as FrameworkElement;
+                int child_index = 0;
+
+                while (VisualTreeHelper.GetChild(parent, child_index) != group)
+                if (VisualTreeHelper.GetChildrenCount(parent) <= ++child_index) throw new InvalidOperationException();
+
+                // Remove the poisiton check and reinsert the original element
+
+                CompositionTarget.Rendering -= positionChecker;
+
+                parent.RemoveChild(group);
+                parent.InsertChildAt(child_index, group.Original);
+
+                return null;
+            }
+            else
+            {
+                // Find the original element to remove it from its parent
+
+                var parent = VisualTreeHelper.GetParent(element) as FrameworkElement;
+                int child_index = 0;
+
+                while (VisualTreeHelper.GetChild(parent, child_index) != element)
+                if (VisualTreeHelper.GetChildrenCount(parent) <= ++child_index) throw new InvalidOperationException();
+
+                parent.RemoveChild(element);
+
+                // Create the new trail group and insert it at the required position
+
+                group = new TrailGroup(element) { Name = element.Name, TrailCooldown = cooldown, FadeDuration = fadeDuration };
+                parent.InsertChildAt(child_index, group);
+
+                // Start the first cooldown and start position checking (first time will not count)
+
+                group.timer.Start();
+                group.lastPosition = element.RelativeLocation();
+                CompositionTarget.Rendering += positionChecker;
+
+                return group;
+            }
+        }
+
+        /// <summary>
+        /// Shakes <paramref name="element"/> by a maximum of <paramref name="intensity"/> units for a period of time.
+        /// </summary>
+        public static async Task Shake(this FrameworkElement element, double intensity, TimeSpan time)
+        {
+            // Setup the animations
+
+            var transform = new TranslateTransform();
+            var anim = new RandomDoubleAnimation(-intensity, intensity, time);
+            var intensity_anim = new DoubleAnimation(intensity, 0, time) { EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
+            var delay_anim = new Int32Animation(25, 100, time) { EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
+
+            // Add the translate transform
+
+            if (element.RenderTransform is TransformGroup g) g.Children.Add(transform);
+            else
+            {
+                var original = element.RenderTransform;
+                var group = (element.RenderTransform = new TransformGroup()) as TransformGroup;
+
+                group.Children.Add(original);
+                group.Children.Add(transform);
+            }
+
+            // Begin the animations
+
+            anim.BeginAnimation(RandomDoubleAnimation.FromProperty, intensity_anim);
+            anim.BeginAnimation(RandomDoubleAnimation.ToProperty, intensity_anim);
+            anim.BeginAnimation(RandomDoubleAnimation.MillisecondDelayProperty, delay_anim);
+
+            transform.BeginAnimation(TranslateTransform.XProperty, anim);
+            transform.BeginAnimation(TranslateTransform.YProperty, anim);
+
+            await Task.Delay(time);
+
+            // Remove the translate transform and restore the original transform
+
+            if (element.RenderTransform is TransformGroup gr) gr.Children.Remove(transform);
+            else
+            {
+                var group = element.RenderTransform as TransformGroup;
+                var original = group.Children[0];
+
+                group.Children.Clear();
+                element.RenderTransform = original;
+            }
         }
     }
 

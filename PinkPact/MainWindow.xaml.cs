@@ -54,6 +54,9 @@ namespace PinkPact
 
             hotkeys.Add(new HotkeyActionChecker(() => ToggleViewportBoxes(), Key.LeftCtrl, Key.D, Key.B));
             hotkeys.Add(new HotkeyActionChecker(() => Maximize(WindowState == WindowState.Maximized), Key.F4));
+            hotkeys.Add(new HotkeyActionChecker(() => format.ToggleTrailing(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(1000)), Key.P));
+            hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top + 100, format.Margin.Right, format.Margin.Bottom), Key.Up));
+            hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top - 100, format.Margin.Right, format.Margin.Bottom), Key.Down));
 
             // Set up screen & viewport data too
 
@@ -75,11 +78,6 @@ namespace PinkPact
             exitBtnVP.Click += (_, __) => exitAction();
 
             CompositionTarget.Rendering += (_, __) => Update();
-
-            format.LinkHandlerAdded += (_, a) =>
-            {
-                a.Handler.Click = (h) => MessageBox.Show("hi");
-            };
 
             // DEMO SHOWCASE
 

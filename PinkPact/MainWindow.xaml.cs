@@ -84,9 +84,6 @@ namespace PinkPact
             //format.PreviewCharacterWritten += (s, e) => Console.WriteLine(e.Character + " " + e.TotalIndex + " " + e.GroupIndex);
             //format.Append(" (i,lb)[newline]. (p,ff`SD Auto Pilot`,s3,f3)[crazy effects] (p,w4,s2,c#f542ef-#983dff)[peepee] (w3)[poopoo]?");
 
-            //var decotrator = game_layer.AddEffects(new Chromatic3DEffect() { Intensity = 5 },
-            //                                       new Vignette2Effect());
-
             ((Action)(async () =>
             {
                 while (!Keyboard.IsKeyDown(Key.K)) await Task.Delay(1);

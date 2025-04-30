@@ -13,6 +13,7 @@ using System;
 using PinkPact.Externals;
 using PinkPact.Shaders;
 using PinkPact.Helpers;
+using PinkPact.Sounds;
 
 
 using static System.Math;
@@ -45,6 +46,11 @@ namespace PinkPact
 
         public MainWindow()
         {
+            //Sound system initialisation + start up sound
+            var Sounds = new SoundManager();
+            Sounds.SoundInitializer();
+            Sounds.PlayAudio("TestSong.ogg");
+
             InitializeComponent();
 
             RenderOptions.SetBitmapScalingMode(mainBorder, BitmapScalingMode.HighQuality);

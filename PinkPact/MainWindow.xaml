@@ -23,7 +23,7 @@
             <cnv:PointConverter x:Key="point"/>
             <cnv:ArithmeticConverter x:Key="math"/>
             <cnv:PathConverter x:Key="path"/>
-            
+
             <FontFamily x:Key="ipixelu">/Resources/Fonts/#I pixel u</FontFamily>
             <FontFamily x:Key="sd_auto_pilot">/Resources/Fonts/#SD Auto Pilot</FontFamily>
             <FontFamily x:Key="mini_pixel">/Resources/Fonts/#Mini Pixel-7</FontFamily>
@@ -38,7 +38,7 @@
               Background="#fef8f6"
               Width="950"
               Height="568">
-            
+
             <Grid x:Name="bgDecorator">
                 <Polygon VerticalAlignment="Top"
                     HorizontalAlignment="Right"
@@ -102,9 +102,9 @@
                             HorizontalAlignment="Right"
                             Margin="0,0,2,2">
                     <ctr:ImageButton x:Name="minBtn"
-                                     Image="/Resources/min_btn.png"
-                                     HoldImage="/Resources/min_btn_hold.png"
-                                     HoverImage="/Resources/min_btn_hover.png"
+                                     Image="/Resources/BorderButtons/min_btn.png"
+                                     HoldImage="/Resources/BorderButtons/min_btn_hold.png"
+                                     HoverImage="/Resources/BorderButtons/min_btn_hover.png"
                                      Width="20"
                                      Height="20"
                                      Margin="0,0,3,0">
@@ -117,9 +117,9 @@
                         </ctr:ImageButton.Effect>
                     </ctr:ImageButton>
                     <ctr:ImageButton x:Name="maxBtn"
-                                     Image="/Resources/max_btn.png"
-                                     HoldImage="/Resources/max_btn_hold.png"
-                                     HoverImage="/Resources/max_btn_hover.png"
+                                     Image="/Resources/BorderButtons/max_btn.png"
+                                     HoldImage="/Resources/BorderButtons/max_btn_hold.png"
+                                     HoverImage="/Resources/BorderButtons/max_btn_hover.png"
                                      Width="20"
                                      Height="20"
                                      Margin="0,0,3,0">
@@ -132,9 +132,9 @@
                         </ctr:ImageButton.Effect>
                     </ctr:ImageButton>
                     <ctr:ImageButton x:Name="exitBtn"
-                                     Image="/Resources/exit_btn.png"
-                                     HoldImage="/Resources/exit_btn_hold.png"
-                                     HoverImage="/Resources/exit_btn_hover.png"
+                                     Image="/Resources/BorderButtons/exit_btn.png"
+                                     HoldImage="/Resources/BorderButtons/exit_btn_hold.png"
+                                     HoverImage="/Resources/BorderButtons/exit_btn_hover.png"
                                      Width="20"
                                      Height="20">
                         <ctr:ImageButton.Effect>
@@ -171,16 +171,16 @@
                       Height="{Binding Height, ElementName=viewport}"
                       RenderTransformOrigin="0.5,0.5"
                       Background="Transparent">
-                    
-                    <ctr:FormattedTextBlock x:Name="format"
+
+                    <!--<ctr:FormattedTextBlock x:Name="format"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Text="(w8,ff`Mini Pixel-7`,c#ff0048-#ff0000,lff`SD Auto Pilot`)[PINK]"
+                                        Text="THE (w8,ff`Mini Pixel-7`,c#ff0048-#ff0000,lff`SD Auto Pilot`)[PINK] PACT"
                                         TextWrapping="Wrap"
                                         FadingDuration="50"
                                         FontFamily="{StaticResource mini_pixel}"
                                         Foreground="White"
-                                        FontSize="150"/>
+                                        FontSize="150"/>-->
 
                 </Grid>
 
@@ -202,26 +202,26 @@
                            Opacity="0.7"
                            Margin="0,10,10,0">
                     <ctr:ImageButton x:Name="minBtnVP"
-                                    Image="/Resources/min_btn_subtle.png"
-                                    HoverImage="/Resources/min_subtle_hold.png"
-                                    HoldImage="/Resources/min_subtle_hold.png"
+                                    Image="/Resources/BorderButtons/min_btn_subtle.png"
+                                    HoverImage="/Resources/BorderButtons/min_subtle_hold.png"
+                                    HoldImage="/Resources/BorderButtons/min_subtle_hold.png"
                                     ScalingMode="NearestNeighbor"
                                     Width="20"
                                     Height="10"
                                     Margin="0,0,10,0">
                     </ctr:ImageButton>
                     <ctr:ImageButton x:Name="maxBtnVP"
-                                    Image="/Resources/max_btn_subtle.png"
-                                    HoverImage="/Resources/max_subtle_hold.png"
-                                    HoldImage="/Resources/max_subtle_hold.png"
+                                    Image="/Resources/BorderButtons/max_btn_subtle.png"
+                                    HoverImage="/Resources/BorderButtons/max_subtle_hold.png"
+                                    HoldImage="/Resources/BorderButtons/max_subtle_hold.png"
                                     Width="20"
                                     Height="20"
                                     Margin="0,0,10,0">
                     </ctr:ImageButton>
                     <ctr:ImageButton x:Name="exitBtnVP"
-                                    Image="/Resources/exit_btn_subtle.png"
-                                    HoverImage="/Resources/exit_subtle_hold.png"
-                                    HoldImage="/Resources/exit_subtle_hold.png"
+                                    Image="/Resources/BorderButtons/exit_btn_subtle.png"
+                                    HoverImage="/Resources/BorderButtons/exit_subtle_hold.png"
+                                    HoldImage="/Resources/BorderButtons/exit_subtle_hold.png"
                                     Width="20"
                                     Height="20">
                     </ctr:ImageButton>

@@ -30,6 +30,7 @@ using static PinkPact.PInvoke;
 using PinkPact.Shaders;
 using PinkPact.Controls;
 using PinkPact.Animations;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace PinkPact.Helpers
 {
@@ -62,6 +63,10 @@ namespace PinkPact.Helpers
             if (effects.Length == 0) throw new ArgumentException("At least 1 effect must be specified.");
 
             var parent = VisualTreeHelper.GetParent(element) as FrameworkElement;
+            if (parent is EffectDecorator)
+            {
+                return parent.AddEffects(effects);
+            }
 
             int child_index = 0;
             DependencyObject child;
@@ -80,6 +85,48 @@ namespace PinkPact.Helpers
             parent.InsertChildAt(child_index, decorator);
 
             return decorator;
+        }
+
+        public static void RemoveEffect(this FrameworkElement element, Effect effect)
+        {
+            element.RemoveFirstEffect(e => e == effect);
+        }
+
+        public static void RemoveFirstEffect(this FrameworkElement element, Func<Effect, bool> predicate)
+        {
+            if (element is EffectDecorator || VisualTreeHelper.GetParent(element) is EffectDecorator)
+            {
+                var d = (element is EffectDecorator ? element : VisualTreeHelper.GetParent(element)) as EffectDecorator;
+                var current = d.GetBottomEffect();
+                do
+                {
+                    if (predicate(current.Effect))
+                    {
+                        current.Remove();
+                        return;
+                    }
+
+                    current = current.Next();
+                }
+                while (current != null);
+                return;
+            }
+        }
+
+        public static void RemoveEffectWhere(this FrameworkElement element, Func<Effect, bool> predicate)
+        {
+            if (element is EffectDecorator || VisualTreeHelper.GetParent(element) is EffectDecorator)
+            {
+                var d = (element is EffectDecorator ? element : VisualTreeHelper.GetParent(element)) as EffectDecorator;
+                var current = d.GetBottomEffect();
+                do
+                {
+                    if (predicate(current.Effect)) current = current.Remove();
+                    else current = current.Next();
+                }
+                while (current != null);
+                return;
+            }
         }
 
         /// <summary>
@@ -134,7 +181,7 @@ namespace PinkPact.Helpers
         }
 
         /// <summary>
-        /// Removes <paramref name="child"/> from <paramref name="parent"/> child tree.
+        /// Removes <paramref name="child"/> from <paramref name="parent"/>'s child tree.
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public static void RemoveChild(this FrameworkElement parent, FrameworkElement child)
@@ -323,6 +370,20 @@ namespace PinkPact.Helpers
                 group.Children.Clear();
                 element.RenderTransform = original;
             }
+        }
+
+        /// <summary>
+        /// Determines the index of <paramref name="element"/> in its parent's child tree.
+        /// </summary>
+        public static int ChildIndex(this FrameworkElement element)
+        {
+            var parent = VisualTreeHelper.GetParent(element) as FrameworkElement;
+            int child_index = 0;
+
+            while (VisualTreeHelper.GetChild(parent, child_index) != element)
+                if (VisualTreeHelper.GetChildrenCount(parent) <= ++child_index) return -1;
+
+            return child_index;
         }
     }
 

@@ -3,6 +3,7 @@ using System.Windows.Media;
 using PinkPact.Helpers;
 using System.Windows;
 using System;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace PinkPact.Shaders
 {
@@ -34,6 +35,7 @@ namespace PinkPact.Shaders
         }
 
         UIElement child;
+        static bool popping = false;
 
         /// <summary>
         /// Creates a new instance of the <see cref="EffectDecorator"/> class.
@@ -88,11 +90,47 @@ namespace PinkPact.Shaders
             return bottom;
         }
 
+        /// <summary>
+        /// Removes this <see cref="EffectDecorator"/> from its corresponding stack.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="EffectDecorator"/> that followed this one in the stack, or <see langword="null"/> if this effect was at the top of the stack.
+        /// </returns>
+        public EffectDecorator Remove()
+        {
+            FrameworkElement parent;
+
+            popping = true;
+            var child = Child;
+            Child = null;
+
+            if ((parent = VisualTreeHelper.GetParent(this) as FrameworkElement) is EffectDecorator p) p.Child = child;
+            else
+            {
+                int index = this.ChildIndex();
+
+                parent.RemoveChild(this);
+                parent.InsertChildAt(index, child as FrameworkElement);
+            }
+
+            popping = false;
+            return parent is EffectDecorator ? parent as EffectDecorator : null;
+        }
+
+        /// <summary>
+        /// Gets the next <see cref="EffectDecorator"/> in the stack, or <see langword="null"/> if this effect is at the top of the stack.
+        /// </summary>
+        public EffectDecorator Next()
+        {
+            var parent = VisualTreeHelper.GetParent(this);
+            return parent is EffectDecorator ? parent as EffectDecorator : null;
+        }
+
         protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
         {
             base.OnVisualChildrenChanged(visualAdded, visualRemoved);
 
-            if (visualRemoved == Child)
+            if (!popping && visualRemoved == Child)
             {
                 var top = this;
                 while (VisualTreeHelper.GetParent(top) is EffectDecorator)

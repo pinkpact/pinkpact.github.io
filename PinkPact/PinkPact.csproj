@@ -176,22 +176,22 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\exit_btn.png" />
+    <Resource Include="Resources\BorderButtons\exit_btn.png" />
     <Resource Include="Resources\final_pp_logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\max_btn.png" />
-    <Resource Include="Resources\min_btn.png" />
+    <Resource Include="Resources\BorderButtons\max_btn.png" />
+    <Resource Include="Resources\BorderButtons\min_btn.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\exit_btn_hover.png" />
-    <Resource Include="Resources\max_btn_hover.png" />
-    <Resource Include="Resources\min_btn_hover.png" />
+    <Resource Include="Resources\BorderButtons\exit_btn_hover.png" />
+    <Resource Include="Resources\BorderButtons\max_btn_hover.png" />
+    <Resource Include="Resources\BorderButtons\min_btn_hover.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\exit_btn_hold.png" />
-    <Resource Include="Resources\max_btn_hold.png" />
-    <Resource Include="Resources\min_btn_hold.png" />
+    <Resource Include="Resources\BorderButtons\exit_btn_hold.png" />
+    <Resource Include="Resources\BorderButtons\max_btn_hold.png" />
+    <Resource Include="Resources\BorderButtons\min_btn_hold.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\mini_logo.png" />
@@ -200,13 +200,15 @@
     <Resource Include="mini_logo.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\exit_btn_subtle.png" />
-    <Resource Include="Resources\exit_subtle_hold.png" />
-    <Resource Include="Resources\max_btn_subtle.png" />
-    <Resource Include="Resources\max_subtle_hold.png" />
-    <Resource Include="Resources\min_btn_subtle.png" />
-    <Resource Include="Resources\min_subtle_hold.png" />
+    <Resource Include="Resources\BorderButtons\exit_btn_subtle.png" />
+    <Resource Include="Resources\BorderButtons\exit_subtle_hold.png" />
+    <Resource Include="Resources\BorderButtons\max_btn_subtle.png" />
+    <Resource Include="Resources\BorderButtons\max_subtle_hold.png" />
+    <Resource Include="Resources\BorderButtons\min_btn_subtle.png" />
+    <Resource Include="Resources\BorderButtons\min_subtle_hold.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\Title\title_screen.gif" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,19 +4,76 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PinkPact"
+             xmlns:efc="clr-namespace:PinkPact.Shaders"
+             xmlns:ctr="clr-namespace:PinkPact.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="1080" 
              d:DesignWidth="1920">
-    <Grid>
-        <Image x:Name="logo"
-               RenderOptions.BitmapScalingMode="NearestNeighbor"
-               Source="/Resources/final_pp_logo.png"
-               Width="500"
-               Height="500">
-            <Image.RenderTransform>
-                <TranslateTransform X="0"
-                                    Y="0"/>
-            </Image.RenderTransform>
-        </Image>
+    <Grid x:Name="viewport"
+          Background="Black"
+          Width="1920"
+          Height="1080">
+        <Grid x:Name="logo"
+              Visibility="Collapsed"
+              Width="750"
+              Height="750"
+              RenderOptions.BitmapScalingMode="NearestNeighbor">
+            <Grid.OpacityMask>
+                <ImageBrush Stretch="Uniform"
+                            Viewport="0,0,750,750"
+                            ViewportUnits="Absolute"
+                            ImageSource="/Resources/final_pp_logo.png"/>
+            </Grid.OpacityMask>
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="logoTranslation"
+                                    Y="20"/>
+            </Grid.RenderTransform>
+            <Grid.Effect>
+                <DropShadowEffect BlurRadius="500"
+                                  Opacity="0.3"
+                                  Color="HotPink"/>
+            </Grid.Effect>
+            
+            <Image Stretch="Uniform"
+                   Source="/Resources/final_pp_logo.png"/>
+            <Grid>
+                <Grid.Effect>
+                    <efc:PixelateEffect Intensity="3"/>
+                </Grid.Effect>
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <SkewTransform AngleX="-10"/>
+                        <TranslateTransform x:Name="shineTranslation"
+                                            X="-250"/>
+                    </TransformGroup>
+                </Grid.RenderTransform>
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Fill="White"
+                               Margin="0,0,30,0"
+                           Opacity="0.5"
+                           HorizontalAlignment="Left"
+                           Width="50"/>
+                    <Rectangle Fill="White"
+                           Opacity="0.5"
+                           HorizontalAlignment="Left"
+                           Width="200"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <Grid x:Name="titleGrid"
+              Visibility="Collapsed"
+              RenderOptions.BitmapScalingMode="NearestNeighbor">
+            <Grid.Effect>
+                <efc:Vignette2Effect x:Name="titleVignette"
+                                     Color="Black"
+                                     Intensity="0.2"/>
+            </Grid.Effect>
+            <ctr:GifImage x:Name="titleBg"
+                          FromPackUri="True"
+                          DelayMs="300"
+                          GifSource="Resources/Title/title_screen.gif"
+                          AutoStart="True"/>
+        </Grid>
     </Grid>
 </UserControl>

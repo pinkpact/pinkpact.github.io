@@ -54,9 +54,9 @@ namespace PinkPact
 
             hotkeys.Add(new HotkeyActionChecker(() => ToggleViewportBoxes(), Key.LeftCtrl, Key.D, Key.B));
             hotkeys.Add(new HotkeyActionChecker(() => Maximize(WindowState == WindowState.Maximized), Key.F4));
-            hotkeys.Add(new HotkeyActionChecker(() => format.ToggleTrailing(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(1000)), Key.P));
-            hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top + 100, format.Margin.Right, format.Margin.Bottom), Key.Up));
-            hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top - 100, format.Margin.Right, format.Margin.Bottom), Key.Down));
+            //hotkeys.Add(new HotkeyActionChecker(() => format.ToggleTrailing(TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000)), Key.P));
+            //hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top + 100, format.Margin.Right, format.Margin.Bottom), Key.Up));
+            //hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top - 100, format.Margin.Right, format.Margin.Bottom), Key.Down));
 
             // Set up screen & viewport data too
 
@@ -79,73 +79,14 @@ namespace PinkPact
 
             CompositionTarget.Rendering += (_, __) => Update();
 
-            // DEMO SHOWCASE
-
-            //format.PreviewCharacterWritten += (s, e) => Console.WriteLine(e.Character + " " + e.TotalIndex + " " + e.GroupIndex);
-            //format.Append(" (i,lb)[newline]. (p,ff`SD Auto Pilot`,s3,f3)[crazy effects] (p,w4,s2,c#f542ef-#983dff)[peepee] (w3)[poopoo]?");
-
             ((Action)(async () =>
             {
-                while (!Keyboard.IsKeyDown(Key.K)) await Task.Delay(1);
+                var title = new Title(this);
+                await ui_layer.Children.Add(title);
 
-                await Task.Delay(2000);
-                await format.SetAsync("this is scrolling text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("this is (p)[pinned] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("this is (b)[bold] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("this is (i)[italic] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("(s4)[this is shaky text] with (s8)[variable] intensity");
-
-                await Task.Delay(2000);
-                await format.SetAsync("(w5)[this is wavy text] with (w15)[variable] intensity");
-
-                await Task.Delay(3000);
-                await format.SetAsync("this is (c#eb34de)[single colored] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("this is (c#eb34de-#ff99f8)[multiple colored] text");
-
-                await Task.Delay(3000);
-                await format.SetAsync("this is (f1.7)[scaled] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("this is (ff`SD Auto Pilot`)[custom fonted] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("this is (fd300)[slowwwwww] text and (fd2)[fastttttttttt] text");
-
-                await Task.Delay(2000);
-                await format.SetAsync("and (w4)[all of these can be] (w5,f1.5,c#eb34de-#ff99f8)[combined!!]");
-
-                await Task.Delay(3000);
-                await format.SetAsync("");
-                viewport.Effect = new Chromatic3DEffect() { Intensity = 1 };
-                await format.SetAsync("this is a cool (w4)[3D] chroma effect");
-
-                var anim = new DoubleAnimation(1, 10, TimeSpan.FromSeconds(3)) { EasingFunction = new SineEase() { EasingMode = EasingMode.EaseInOut } };
-                viewport.Effect.BeginAnimation(Chromatic3DEffect.IntensityProperty, anim);
-
-                await Task.Delay(5000);
-                await format.SetAsync("");
-                viewport.Effect = new PixelateEffect() { Intensity = 1 };
-                await format.SetAsync("this is a pixelation effect");
-
-                anim = new DoubleAnimation(1, 5, TimeSpan.FromSeconds(3)) { EasingFunction = new SineEase() { EasingMode = EasingMode.EaseInOut } };
-                viewport.Effect.BeginAnimation(PixelateEffect.IntensityProperty, anim);
-
-                await Task.Delay(4000);
-                await format.SetAsync("");
-                viewport.Effect = null;
-
-                while (!format.UpToDate) await format.ForceShow();
-                Console.WriteLine("done");
+                await Task.Delay(100);
+               // await title.Show();
+                await title.FirstSequence();
             }
             ))();
         }

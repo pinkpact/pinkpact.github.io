@@ -3,6 +3,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Windows;
 using System;
+using System.Threading.Tasks;
 
 namespace PinkPact.Controls
 {
@@ -35,7 +36,14 @@ namespace PinkPact.Controls
         public int DelayMs
         {
             get => (int)GetValue(DelayMsProperty);
-            set => SetValue(DelayMsProperty, value);
+            set
+            {
+                SetValue(DelayMsProperty, value);
+                
+                StopAnimation();
+                _animation.Duration = new Duration(TimeSpan.FromMilliseconds(DelayMs * _gifDecoder.Frames.Count - _gifDecoder.Frames.Count));
+                StartAnimation();
+            }
         }
 
         static GifImage()
@@ -68,11 +76,24 @@ namespace PinkPact.Controls
 
         void Initialize()
         {
-            _gifDecoder = new GifBitmapDecoder(new Uri((FromPackUri ? "pack://application:,,," : "") + GifSource, UriKind.RelativeOrAbsolute), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+            if (string.IsNullOrEmpty(GifSource) || string.IsNullOrWhiteSpace(GifSource)) return;
+
+            _gifDecoder = new GifBitmapDecoder(new Uri((FromPackUri ? "pack://application:,,,/PinkPact;component/" : "") + GifSource, UriKind.RelativeOrAbsolute), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
             _animation = new Int32Animation(0, _gifDecoder.Frames.Count, new Duration(TimeSpan.FromMilliseconds(DelayMs * _gifDecoder.Frames.Count - _gifDecoder.Frames.Count))) { RepeatBehavior = RepeatBehavior.Forever };
             Source = _gifDecoder.Frames[0];
 
             _isInitialized = true;
+        }
+
+        public async Task PlayOnce()
+        {
+            if (!_isInitialized)
+                this.Initialize();
+
+            _animation.RepeatBehavior = default;
+            StartAnimation();
+
+            await Task.Delay(_animation.Duration.TimeSpan);
         }
 
         static void AutoStartPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)

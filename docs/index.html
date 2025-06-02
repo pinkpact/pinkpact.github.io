@@ -57,8 +57,10 @@
             border: none;
             image-rendering: pixelated;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
-            background: url('images/buttons/download_btn.png') no-repeat center center;
-            background-size: cover;
+            background: url('images/buttons/download_btn.png') no-repeat center center !important;
+            background-size: cover !important;
+            filter: none !important;
+            background-blend-mode: normal !important;
             cursor: default;
         }
 
@@ -88,7 +90,7 @@
              style="position: absolute;">
 
             <img style="image-rendering: pixelated;
-                        filter: drop-shadow(0 0 50px #ff69a8);
+                        filter: drop-shadow(0 0 50px black);
                         transform: scale(1.7);"
                 src="images/pp_logo_full.png"/>
         </div>

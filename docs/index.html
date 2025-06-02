@@ -43,6 +43,24 @@
             transform: translate(-50%, -50%);
         }
 
+        .bg 
+        {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100vw;
+            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            object-fit: cover;
+            transform: translate(-50%, -50%);
+            aspect-ratio: 16/9;
+            background: #000;
+            pointer-events: none;
+            user-select: none;
+        }
+
         .fill
         {
             width: 100%;
@@ -57,8 +75,15 @@
             border: none;
             image-rendering: pixelated;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
-            background: url('images/buttons/download_btn.png') no-repeat center center !important;
+            filter: none !important;
+            background-image: url('images/buttons/download_btn.png');
+            background-color: transparent !important;
+            color-scheme: only light;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
             background-size: cover !important;
+            mix-blend-mode: normal !important;
+            color-scheme: only light;
             filter: none !important;
             background-blend-mode: normal !important;
             cursor: default;
@@ -81,8 +106,9 @@
         <div class="center_bg fill"
              style="position: absolute;">
 
-            <img style="image-rendering: pixelated;"
-                 class="fill"
+            <img class="bg fill"
+                 style="image-rendering: pixelated;"
+                 
                 src="images/title_screen.gif"/>
         </div>
 
@@ -95,10 +121,10 @@
                 src="images/pp_logo_full.png"/>
         </div>
 
-        <div class="center_bg"
+        <div class="center_bg download_button"
+             role="button"
              style="position: absolute;
                     transform: translate(-50%, 190%);">
-            <button class="download_button"></button>
         </div>
     </div>
 </body>

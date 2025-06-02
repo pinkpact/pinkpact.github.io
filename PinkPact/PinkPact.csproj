@@ -10,6 +10,9 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
 	<WarningsNotAsErrors>SYSLIB0011</WarningsNotAsErrors>
   </PropertyGroup>
+  <PropertyGroup>
+	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1701;1702;SYSLIB1045;CA1854;CA2101</NoWarn>

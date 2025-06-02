@@ -108,7 +108,7 @@ namespace PinkPact.Text
             formattedText = Regex.Replace(formattedText, @"^<([a-z](,[a-z])*|-)>", "");
 
             //Use a copy of the formatted text to later store the unformatted version
-            string originalText = string.Copy(formattedText);
+            string originalText = new string(formattedText);
 
             //The regex for the formatting pattern
             var pattern = new Regex(@"\((s|c|w|f(?![df])|b|i|l|fd|ff|p)(`[^`]+`|\d+(\.\d+)?|#[a-fA-F0-9]+(-#[a-fA-F0-9]+)?|((s|c|w|f(?![df])|b|i|ff)(`[^`]+`|\d+(\.\d+)?|#[a-fA-F0-9]+(-#[a-fA-F0-9]+)?|))|)(,(s|c|w|f(?![df])|b|i|l|fd|ff|p)(`[^`]+`|\d+(\.\d+)?|#[a-fA-F0-9]+(-#[a-fA-F0-9]+)?|((s|c|w|f(?![df])|b|i|ff)(`[^`]+`|\d+(\.\d+)?|#[a-fA-F0-9]+(-#[a-fA-F0-9]+)?|))|))*\)\[(([^()\[\]]*(\\\]|\\\[|\\\(|\\\))*)*|((\\\]|\\\[|\\\(|\\\))*[^()\[\]]*)*)(?<!\\)\]");

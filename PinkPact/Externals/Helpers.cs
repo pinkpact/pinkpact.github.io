@@ -26,14 +26,88 @@ using System.IO;
 using System;
 
 using static PinkPact.PInvoke;
+using static System.Math;
 
 using PinkPact.Shaders;
 using PinkPact.Controls;
 using PinkPact.Animations;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
+using System.Xml.Linq;
+
+using FmodAudio.Base;
+using FmodAudio.DigitalSignalProcessing;
+using FmodAudio;
+using FmodAudio.DigitalSignalProcessing.Effects;
+using PinkPact.Externals;
+
+#pragma warning disable SYSLIB0011
+#pragma warning disable SYSLIB0014
 
 namespace PinkPact.Helpers
 {
+    public static class AudioHelper
+    {
+        public static uint MillisecondsToPCM(this Sound s, uint ms)
+        {
+            float frequency;
+            s.GetDefaults(out frequency, out _);
+
+            return (uint)(ms * (double)frequency / 1000);
+        }
+
+        public static void Test()
+        {
+            var sys = Fmod.CreateSystem();
+            sys.Init(100);
+
+            var file = ResourceHelper.GetResource("Resources/Sounds/fall2.ogg");
+
+            var sound = sys.CreateSound(@"D:\games\Undertale Yellow\mus\genobattle_yellow.ogg");
+            ChannelGroup ch = sys.CreateChannelGroup("1");
+
+            float speed = 1f;
+            float pitch = 0.75f;
+            float tempo = 0.25f; 
+
+            Dsp dsp = sys.CreateDSPByType(DSPType.PitchShift);
+            dsp.SetParameterFloat((int)DspPitchShift.Pitch, pitch / speed);
+
+            Channel playing = sys.PlaySound(sound, ch, true);
+            playing.AddDSP(ChannelControlDSPIndex.DspHead, dsp);
+            playing.Pitch = tempo * speed;
+            playing.Paused = false;
+
+            ((Action)(async () =>
+            {
+                while (playing.IsPlaying)
+                {
+                    Console.WriteLine($"{playing.GetPosition(TimeUnit.MS)} / {sound.GetLength(TimeUnit.MS)}");
+                    await 1;
+                }
+            }
+            ))();
+            HotkeyManager.Add(() => playing.SetPosition(TimeUnit.MS, playing.GetPosition(TimeUnit.MS) + 1000), Key.Right);
+            HotkeyManager.Add(() => playing.SetPosition(TimeUnit.MS, playing.GetPosition(TimeUnit.MS) - 1000), Key.Left);
+        }
+    }
+
+    /// <summary>
+    /// Provides static methods useful for interacting with application resources.
+    /// </summary>
+    public static class ResourceHelper
+    {
+        /// <summary>
+        /// Gets the resource located at the path <paramref name="resource"/> as a <see cref="byte"/>[].
+        /// </summary>
+        public static byte[] GetResource(string resource)
+        {
+            var res = Application.GetResourceStream(new Uri("pack://application:,,,/PinkPact;component/" + resource.TrimStart('/'), UriKind.RelativeOrAbsolute));
+            using var stream = new MemoryStream();
+
+            res.Stream.CopyTo(stream);
+            return stream.ToArray();
+        }
+    }
+
     /// <summary>
     /// Provides static methods useful for UI interactions.
     /// </summary>
@@ -87,11 +161,17 @@ namespace PinkPact.Helpers
             return decorator;
         }
 
+        /// <summary>
+        /// Removes the first occurence of <paramref name="effect"/> from <paramref name="element"/>'s <see cref="EffectDecorator"/> stack.
+        /// </summary>
         public static void RemoveEffect(this FrameworkElement element, Effect effect)
         {
             element.RemoveFirstEffect(e => e == effect);
         }
 
+        /// <summary>
+        /// Removes the first <see cref="Effect"/> in <paramref name="element"/>'s <see cref="EffectDecorator"/> stack for which <paramref name="predicate"/>(effect) returns <see langword="true"/>.
+        /// </summary>
         public static void RemoveFirstEffect(this FrameworkElement element, Func<Effect, bool> predicate)
         {
             if (element is EffectDecorator || VisualTreeHelper.GetParent(element) is EffectDecorator)
@@ -113,6 +193,9 @@ namespace PinkPact.Helpers
             }
         }
 
+        /// <summary>
+        /// Removes all <see cref="Effect"/>s in <paramref name="element"/>'s <see cref="EffectDecorator"/> stack for which <paramref name="predicate"/>(effect) returns <see langword="true"/>.
+        /// </summary>
         public static void RemoveEffectWhere(this FrameworkElement element, Func<Effect, bool> predicate)
         {
             if (element is EffectDecorator || VisualTreeHelper.GetParent(element) is EffectDecorator)
@@ -211,6 +294,14 @@ namespace PinkPact.Helpers
 
             await Task.Delay(duration);
             (VisualTreeHelper.GetParent(element) as FrameworkElement).RemoveChild(element);
+        }
+
+        /// <summary>
+        /// Fades <paramref name="element"/> out over <paramref name="msDuration"/> milliseconds, then removes it as a child from its parent.
+        /// </summary>
+        public static async Task FadeOut(this FrameworkElement element, int msDuration, EasingFunctionBase easingFunction = null)
+        {
+            await FadeOut(element, TimeSpan.FromMilliseconds(msDuration), easingFunction);
         }
 
         /// <summary>
@@ -325,27 +416,39 @@ namespace PinkPact.Helpers
         }
 
         /// <summary>
-        /// Shakes <paramref name="element"/> by a maximum of <paramref name="intensity"/> units for a period of time.
+        /// Toggles a trail for <paramref name="element"/>, meaning every time <paramref name="element"/> updates its position, it will leave a trail behind it.
+        /// <para> To toggle the trail on/off, call this method on either the original <see cref="FrameworkElement"/>, or a previously returned <see cref="TrailGroup"/>.<br/>When toggled on, <paramref name="element"/> will be replaced as the child of its parent with a <see cref="TrailGroup"/>.<br/>Inversely, when toggled off, the parent will regain the original <see cref="FrameworkElement"/> as its child at its orignal index.</para>
+        /// <para>Note: calling this method on a <see cref="TrailGroup"/> will always toggle the trail off.</para>
         /// </summary>
-        public static async Task Shake(this FrameworkElement element, double intensity, TimeSpan time)
+        /// <exception cref="InvalidOperationException"></exception>
+        public static TrailGroup ToggleTrailing(this FrameworkElement element, int msCooldown = 0, int msFadeDuration = 0)
+        {
+            return ToggleTrailing(element, msCooldown == 0 ? default : TimeSpan.FromMilliseconds(msCooldown), msFadeDuration == 0 ? default : TimeSpan.FromMilliseconds(msFadeDuration));
+        }
+
+        /// <summary>
+        /// Shakes <paramref name="element"/> by a maximum of <paramref name="intensity"/> units.<br/>
+        /// The shake takes <paramref name="shakeDuration"/> time to perform.
+        /// </summary>
+        public static async Task Shake(this FrameworkElement element, double intensity, TimeSpan shakeDuration)
         {
             // Setup the animations
 
             var transform = new TranslateTransform();
-            var anim = new RandomDoubleAnimation(-intensity, intensity, time);
-            var intensity_anim = new DoubleAnimation(intensity, 0, time) { EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
-            var delay_anim = new Int32Animation(25, 100, time) { EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
+            var anim = new RandomDoubleAnimation(-intensity, intensity, shakeDuration);
+            var intensity_anim = new DoubleAnimation(intensity, 0, shakeDuration) { FillBehavior = FillBehavior.Stop, EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
+            var delay_anim = new Int32Animation(25, 100, shakeDuration) { FillBehavior = FillBehavior.Stop, EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
 
             // Add the translate transform
 
             if (element.RenderTransform is TransformGroup g) g.Children.Add(transform);
             else
             {
-                var original = element.RenderTransform;
-                var group = (element.RenderTransform = new TransformGroup()) as TransformGroup;
+                var o = element.RenderTransform;
+                var gr = (element.RenderTransform = new TransformGroup()) as TransformGroup;
 
-                group.Children.Add(original);
-                group.Children.Add(transform);
+                gr.Children.Add(o);
+                gr.Children.Add(transform);
             }
 
             // Begin the animations
@@ -357,19 +460,85 @@ namespace PinkPact.Helpers
             transform.BeginAnimation(TranslateTransform.XProperty, anim);
             transform.BeginAnimation(TranslateTransform.YProperty, anim);
 
-            await Task.Delay(time);
+            await Task.Delay(shakeDuration);
 
             // Remove the translate transform and restore the original transform
 
-            if (element.RenderTransform is TransformGroup gr) gr.Children.Remove(transform);
+            var group = element.RenderTransform as TransformGroup;
+            var original = group?.Children?[0];
+
+            group?.Children.Clear();
+            element.RenderTransform = original;
+        }
+
+        /// <summary>
+        /// Shakes <paramref name="element"/> by a maximum of <paramref name="intensity"/> units.<br/>
+        /// The shake takes <paramref name="msShakeDuration"/> milliseconds to perform.
+        /// </summary>
+        public static async Task Shake(this FrameworkElement element, double intensity, int msShakeDuration)
+        {
+            await Shake(element, intensity, TimeSpan.FromMilliseconds(msShakeDuration));
+        }
+
+        /// <summary>
+        /// Shakes <paramref name="element"/> by a maximum of <paramref name="intensity"/> units while <paramref name="predicate"/>() returns <see langword="true"/>.<br/>
+        /// One shake takes <paramref name="shakeDuration"/> time to perform.
+        /// </summary>
+        public static async Task ShakeWhile(this FrameworkElement element, double intensity, TimeSpan shakeDuration, Func<bool> predicate)
+        {
+            // Setup the animations
+
+            var transform = new TranslateTransform();
+            var anim = new RandomDoubleAnimation(-intensity, intensity, shakeDuration) { FillBehavior = FillBehavior.Stop, RepeatBehavior = RepeatBehavior.Forever };
+            var intensity_anim = new DoubleAnimation(intensity, 0, shakeDuration) { FillBehavior = FillBehavior.Stop, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
+            var delay_anim = new Int32Animation(25, 100, shakeDuration) { FillBehavior = FillBehavior.Stop, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = new SineEase() { EasingMode = EasingMode.EaseOut } };
+
+            // Add the translate transform
+
+            if (element.RenderTransform is TransformGroup g) g.Children.Add(transform);
             else
             {
-                var group = element.RenderTransform as TransformGroup;
-                var original = group.Children[0];
+                var o = element.RenderTransform;
+                var gr = (element.RenderTransform = new TransformGroup()) as TransformGroup;
 
-                group.Children.Clear();
-                element.RenderTransform = original;
+                gr.Children.Add(o);
+                gr.Children.Add(transform);
             }
+
+            // Begin the animations
+
+            anim.BeginAnimation(RandomDoubleAnimation.FromProperty, intensity_anim);
+            anim.BeginAnimation(RandomDoubleAnimation.ToProperty, intensity_anim);
+            anim.BeginAnimation(RandomDoubleAnimation.MillisecondDelayProperty, delay_anim);
+
+            transform.BeginAnimation(TranslateTransform.XProperty, anim);
+            transform.BeginAnimation(TranslateTransform.YProperty, anim);
+
+            while (predicate()) await Task.Delay(1);
+
+            anim.BeginAnimation(RandomDoubleAnimation.FromProperty, null);
+            anim.BeginAnimation(RandomDoubleAnimation.ToProperty, null);
+            anim.BeginAnimation(RandomDoubleAnimation.MillisecondDelayProperty, null);
+
+            transform.BeginAnimation(TranslateTransform.XProperty, null);
+            transform.BeginAnimation(TranslateTransform.YProperty, null);
+
+            // Remove the translate transform and restore the original transform
+
+            var group = element.RenderTransform as TransformGroup;
+            var original = group?.Children?[0];
+
+            group?.Children.Clear();
+            element.RenderTransform = original;
+        }
+
+        /// <summary>
+        /// Shakes <paramref name="element"/> by a maximum of <paramref name="intensity"/> units while <paramref name="predicate"/>() returns <see langword="true"/>.<br/>
+        /// One shake takes <paramref name="msShakeDuration"/> milliseconds to perform.
+        /// </summary>
+        public static async Task ShakeWhile(this FrameworkElement element, double intensity, int msShakeDuration, Func<bool> predicate)
+        {
+            await ShakeWhile(element, intensity, TimeSpan.FromMilliseconds(msShakeDuration), predicate);
         }
 
         /// <summary>
@@ -385,6 +554,172 @@ namespace PinkPact.Helpers
 
             return child_index;
         }
+
+        /// <summary>
+        /// Changes the coordinates of a <see cref="TranslateTransform"/> to those of <paramref name="destination"/> using softened movement.
+        /// <para>Note: The movement is linear (i.e. only uses straight lines).</para>
+        /// </summary>
+        public static async Task LinearSoftMove(this TranslateTransform transform, Point destination, TimeSpan duration)
+        {
+            var anim = new DoubleAnimation
+            {
+                Duration = duration,
+                EasingFunction = new QuinticEase() { EasingMode = EasingMode.EaseOut },
+
+                // Move X
+
+                From = transform.X,
+                To = destination.X
+            };
+
+            transform.BeginAnimation(TranslateTransform.XProperty, anim);
+
+            // Move Y
+
+            anim.From = transform.Y;
+            anim.To = destination.Y;
+
+            transform.BeginAnimation(TranslateTransform.YProperty, anim);
+
+            await Task.Delay(duration);
+
+            transform.BeginAnimation(TranslateTransform.XProperty, null);
+            transform.BeginAnimation(TranslateTransform.YProperty, null);
+
+            transform.X = destination.X;
+            transform.Y = destination.Y;
+        }
+
+        /// <summary>
+        /// Changes the coordinates of a <see cref="TranslateTransform"/> to those of <paramref name="destination"/> using softened movement.
+        /// <para>Note: The movement is linear (i.e. only uses straight lines).</para>
+        /// </summary>
+        public static async Task LinearSoftMove(this TranslateTransform transform, Point destination, int msDuration)
+        {
+            await LinearSoftMove(transform, destination, TimeSpan.FromMilliseconds(msDuration));
+        }
+
+        /// <summary>
+        /// Waits for <paramref name="element"/> to be clicked.
+        /// </summary>
+        public static async Task AwaitClick(this FrameworkElement element)
+        {
+            bool clicked = false;
+            EventHelper.AddClickHandler(element, handler);
+
+            while (!clicked) await Task.Delay(1);
+            EventHelper.RemoveClickHandler(element, handler);
+
+            void handler(object sender, RoutedEventArgs e) => clicked = true;
+        }
+
+        /// <summary>
+        /// Allows <paramref name="element"/> to be dragged by a mouse with its left button down over the area of its visual parent.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the toggle is on and the element can be dragged, <see langword="false"/> otherwise.
+        /// </returns>
+        public static bool ToggleDragging(this FrameworkElement holder, FrameworkElement target)
+        {
+            if (DraggingUtility.Registered.ContainsKey(holder))
+            {
+                DraggingUtility.Registered[holder].Toggle();
+                DraggingUtility.Registered.Remove(holder);
+
+                return false;
+            }
+
+            var util = new DraggingUtility(holder, target);
+            DraggingUtility.Registered.Add(holder, util);
+            util.Toggle();
+                
+            return true;
+        }
+
+        #region Utilitary
+
+        class DraggingUtility
+        {
+            public static Dictionary<FrameworkElement, DraggingUtility> Registered { get; } = new Dictionary<FrameworkElement, DraggingUtility>();
+
+            readonly TranslateTransform transform = new TranslateTransform();
+            readonly FrameworkElement holder;
+            readonly FrameworkElement target;
+
+            bool isDragging = false,
+                 toggled = false;
+
+            Point startMouse = default,
+                  startOffset = default;
+
+            public DraggingUtility(FrameworkElement holder, FrameworkElement target)
+            {
+                this.holder = holder;
+                this.target = target;
+            }
+
+            public void Toggle()
+            {
+                if (toggled)
+                {
+                    holder.MouseLeftButtonUp -= OnMouseLBUp;
+                    holder.MouseLeftButtonDown -= OnMouseLBDown;
+                    holder.MouseMove -= OnMouseMove;
+
+                    var group = target.RenderTransform as TransformGroup;
+                    var original = group.Children[0];
+
+                    group.Children.Clear();
+                    target.RenderTransform = original;
+
+                    toggled = false;
+                    return;
+                }
+
+                if (target.RenderTransform is TransformGroup g) g.Children.Add(transform);
+                else
+                {
+                    var original = target.RenderTransform;
+                    var group = (target.RenderTransform = new TransformGroup()) as TransformGroup;
+
+                    group.Children.Add(original);
+                    group.Children.Add(transform);
+                }
+
+                holder.MouseLeftButtonUp += OnMouseLBUp;
+                holder.MouseLeftButtonDown += OnMouseLBDown;
+                holder.MouseMove += OnMouseMove;
+
+                toggled = true;
+            }
+
+            void OnMouseLBDown(object sender, MouseEventArgs e)
+            {
+                isDragging = true;
+                startMouse = e.GetPosition(target.Parent as FrameworkElement);
+                startOffset = new Point(transform.X, transform.Y);
+                holder.CaptureMouse();
+            }
+
+            void OnMouseLBUp(object sender, MouseEventArgs e)
+            {
+                isDragging = false;
+                holder.ReleaseMouseCapture();
+            }
+
+            void OnMouseMove(object sender, MouseEventArgs e)
+            {
+                if (!isDragging) return;
+
+                var current = e.GetPosition(target.Parent as FrameworkElement);
+                Vector delta = current - startMouse;
+
+                transform.X = startOffset.X + delta.X;
+                transform.Y = startOffset.Y + delta.Y;
+            }
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -395,7 +730,7 @@ namespace PinkPact.Helpers
         public static double GetScalingFactorOfMonitor(Window window)
         {
             var hmonitor = MonitorFromWindow(new WindowInteropHelper(window).Handle, 0x00000002);
-            GetDpiForMonitor(hmonitor, 0, out _, out uint ydpi);
+            _ = GetDpiForMonitor(hmonitor, 0, out _, out uint ydpi);
 
             return ydpi / 96.0d;
         }
@@ -445,7 +780,10 @@ namespace PinkPact.Helpers
     {
         readonly static DoubleAnimation opacityAnim = new DoubleAnimation() { FillBehavior = FillBehavior.HoldEnd },
                                         wAnim = new DoubleAnimation() { FillBehavior = FillBehavior.HoldEnd },
-                                        hAnim = new DoubleAnimation() { FillBehavior = FillBehavior.HoldEnd };
+                                        hAnim = new DoubleAnimation() { FillBehavior = FillBehavior.HoldEnd },
+                                        generalDoubleAnim = new DoubleAnimation();
+
+        readonly static Int32Animation generalInt32Anim = new Int32Animation();
 
         readonly static ThicknessAnimation marginAnim = new ThicknessAnimation() { FillBehavior = FillBehavior.HoldEnd };
         readonly static ColorAnimation colorAnim = new ColorAnimation() { FillBehavior = FillBehavior.HoldEnd };
@@ -466,6 +804,8 @@ namespace PinkPact.Helpers
         };
         readonly static Timeline[] animations = new Timeline[] { opacityAnim, wAnim, hAnim, marginAnim, colorAnim };
 
+        static IAnimatable last = null;
+
         static AnimationHelper()
         {
             for (int i = 0; i < animations.Length; i++) Timeline.SetDesiredFrameRate(animations[i], 120);
@@ -476,7 +816,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateOpacity(this FrameworkElement obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             opacityAnim.From = from;
             opacityAnim.To = to;
@@ -495,7 +835,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimateOpacityAsync(this FrameworkElement obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             opacityAnim.From = from;
             opacityAnim.To = to;
@@ -514,7 +854,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateBrushOpacity(this Brush brush, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             opacityAnim.From = from;
             opacityAnim.To = to;
@@ -533,7 +873,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimateBrushOpacityAsync(this Brush brush, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             opacityAnim.From = from;
             opacityAnim.To = to;
@@ -552,7 +892,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateColor(this SolidColorBrush brush, Color from, Color to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             colorAnim.From = from;
             colorAnim.To = to;
@@ -571,7 +911,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimateColorAsync(this SolidColorBrush brush, Color from, Color to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             colorAnim.From = from;
             colorAnim.To = to;
@@ -590,7 +930,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateWidth(this ScaleTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             wAnim.From = from;
             wAnim.To = to;
@@ -609,7 +949,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimateWidthAsync(this ScaleTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             wAnim.From = from;
             wAnim.To = to;
@@ -628,7 +968,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateHeight(this ScaleTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             hAnim.From = from;
             hAnim.To = to;
@@ -647,7 +987,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimateHeightAsync(this ScaleTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             hAnim.From = from;
             hAnim.To = to;
@@ -666,7 +1006,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateWidth(this FrameworkElement obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             wAnim.From = from;
             wAnim.To = to;
@@ -685,7 +1025,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateWidthAsync(this FrameworkElement obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             wAnim.From = from;
             wAnim.To = to;
@@ -704,7 +1044,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateHeight(this FrameworkElement obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             hAnim.From = from;
             hAnim.To = to;
@@ -723,7 +1063,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateHeightAsync(this FrameworkElement obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             hAnim.From = from;
             hAnim.To = to;
@@ -742,7 +1082,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimatePositionX(this TranslateTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             wAnim.From = from;
             wAnim.To = to;
@@ -761,7 +1101,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimatePositionXAsync(this TranslateTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             wAnim.From = from;
             wAnim.To = to;
@@ -780,7 +1120,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimatePositionY(this TranslateTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             hAnim.From = from;
             hAnim.To = to;
@@ -799,7 +1139,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimatePositionYAsync(this TranslateTransform obj, double from, double to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             hAnim.From = from;
             hAnim.To = to;
@@ -818,7 +1158,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async void AnimateMargin(this FrameworkElement obj, Thickness from, Thickness to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             marginAnim.From = from;
             marginAnim.To = to;
@@ -837,7 +1177,7 @@ namespace PinkPact.Helpers
         /// </summary>
         public static async Task AnimateMarginAsync(this FrameworkElement obj, Thickness from, Thickness to, int duration, Type easing, EasingMode mode)
         {
-            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", "easing");
+            if (!funcs.ContainsKey(easing)) throw new ArgumentException("The type of " + easing.Name + " does not represent a valid EasingFunctionBase", nameof(easing));
 
             marginAnim.From = from;
             marginAnim.To = to;
@@ -849,6 +1189,65 @@ namespace PinkPact.Helpers
             await Task.Delay(duration);
             obj.Margin = to;
             obj.BeginAnimation(FrameworkElement.MarginProperty, null);
+        }
+
+        public static async Task Animate<TAnim, T>
+        (
+            this DependencyProperty property, 
+            IAnimatable element, 
+            T from, 
+            T to, 
+            int duration, 
+            int framerate = 60,
+            bool reverse = false,
+            bool awaitReversal = true,
+            EasingFunctionBase easing = null,
+            FillBehavior fillBehavior = FillBehavior.HoldEnd
+        )
+            where TAnim : AnimationTimeline, new()
+        {
+            dynamic anim = new TAnim();
+            anim.From = from;
+            anim.To = to;
+            anim.Duration = TimeSpan.FromMilliseconds(duration);
+            anim.EasingFunction = easing;
+            anim.FillBehavior = fillBehavior;
+            anim.AutoReverse = reverse;
+
+            Timeline.SetDesiredFrameRate(anim, framerate);
+            element.BeginAnimation(property, anim);
+            last = element;
+
+            await Task.Delay(duration * (reverse && awaitReversal ? 2 : 1));
+        }
+
+        public static async Task Animate<TAnim, T>
+        (
+            this DependencyProperty property,
+            T from,
+            T to,
+            int duration,
+            int framerate = 60,
+            bool reverse = false,
+            bool awaitReversal = true,
+            EasingFunctionBase easing = null,
+            FillBehavior fillBehavior = FillBehavior.HoldEnd
+        )
+            where TAnim : AnimationTimeline, new()
+        {
+            if (last is null) throw new InvalidOperationException("An IAnimatable must be animated first.");
+
+            dynamic anim = new TAnim();
+            anim.From = from;
+            anim.To = to;
+            anim.Duration = TimeSpan.FromMilliseconds(duration);
+            anim.EasingFunction = easing;
+            anim.FillBehavior = fillBehavior;
+            anim.AutoReverse = reverse;
+
+            Timeline.SetDesiredFrameRate(anim, framerate);
+            last.BeginAnimation(property, anim);
+            await Task.Delay(duration * (reverse && awaitReversal ? 2 : 1));
         }
     }
     
@@ -899,9 +1298,9 @@ namespace PinkPact.Helpers
                     var op2 = dt.Compute(Regex.Match(match.Value, @"(?<=\?)[^A-Za-z?><=\[\]]+?(?=\:)").Value, "");
                     var op3 = dt.Compute(Regex.Match(match.Value, @"(?<=\:)[^A-Za-z?><=\[\]]+?(?=\])").Value, "");
 
-                    if (condition.Contains(">")) str = str.Replace(match.Value, condition.Contains(">") ? (condition.Contains("=") ? (op0 >= op1 ? op2 : op3).ToString() :
+                    if (condition.Contains('>')) str = str.Replace(match.Value, condition.Contains('>') ? (condition.Contains('=') ? (op0 >= op1 ? op2 : op3).ToString() :
                                                                                                                                                   (op0 > op1 ? op2 : op3).ToString()) :
-                                                                                              condition.Contains("<") ? (condition.Contains("=") ? (op0 <= op1 ? op2 : op3).ToString() :
+                                                                                              condition.Contains('<') ? (condition.Contains('=') ? (op0 <= op1 ? op2 : op3).ToString() :
                                                                                                                                                    (op0 > op1 ? op2 : op3).ToString()) :
                                                                                                                                                    "");
                 }
@@ -973,107 +1372,6 @@ namespace PinkPact.Helpers
         {
             return GetKeyState(KeyInterop.VirtualKeyFromKey(key)) == 1;
         }
-
-        public class KeyHandler
-        {
-            /// <summary>
-            /// The <c>Key</c> that is assigned to this <c>KeyHandler</c>.
-            /// </summary>
-            public Key Key
-            {
-                get => key;
-                set
-                {
-                    key = value;
-                    state = 0;
-                }
-            }
-
-            /// <summary>
-            /// Checks if the <c>Key</c> is in a toggled state.
-            /// <para>
-            /// Remark: the <c>Toggled</c> state is dependent to the instance of the <c>KeyHandler</c>, not the actual state of the key.
-            /// </para>
-            /// </summary>
-            public bool Toggled { get; set; } = false;
-
-            public long CheckState
-            {
-                get => state;
-                set => state = value;
-            }
-
-            long state = 0;
-            Key key = Key.None;
-
-            /// <summary>
-            /// Creates a new instance of the <c>KeyHandler</c> class.
-            /// </summary>
-            /// <param name="k"></param>
-            public KeyHandler(Key k) => Key = k;
-
-            /// <summary>
-            /// Checks if <c>Key</c> is in a toggled state (dependent to its instance).
-            /// <para>
-            /// Returns: <c>Toggled</c>
-            /// </para>
-            /// </summary>
-            /// <returns></returns>
-            public bool CheckToggle()
-            {
-                if (Keyboard.IsKeyDown(Key)) if (state == 0) { state++; Toggled = true; } else if (state == -1) { Toggled = false; }
-                if (Keyboard.IsKeyUp(Key)) if (Toggled) state = -1; else state = 0;
-                return Toggled;
-            }
-        }
-
-        public class HotkeyActionChecker
-        {
-            readonly Dictionary<Key, KeyHandler> handlers = new Dictionary<Key, KeyHandler>();
-            readonly Action action;
-            readonly Key[] keys;
-
-            public HotkeyActionChecker(Action action, params Key[] keys) 
-            {
-                this.keys = keys;
-                this.action = action;
-
-                foreach (var key in keys) handlers.Add(key, new KeyHandler(key));
-            }
-
-            public bool Check()
-            {
-                // Here just do a general check on the keys
-                // That is, if a key is not down, instant return.
-                // In the end, at least 1 key must've JUST been pressed for the hotkey to work.
-                // Each key's hold counter is reset ONLY when it's let go, so '1' is equivalent to an immediate press.
-                // By holding it longer, the counter will just keep going, and so it won't be 1.
-                // This prevents the holding issue.
-
-                bool pressed = false;
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    var handler = handlers[keys[i]];
-                    if (Keyboard.IsKeyDown(keys[i])) handler.CheckState++;
-                    if (Keyboard.IsKeyUp(keys[i]))
-                    {
-                        handler.CheckState = 0;
-                        return false;
-                    }
-
-                    pressed |= handler.CheckState == 1;
-                }
-
-                // This checks the order.
-                // Realistically, when a human presses the keys, each key will have a lower hold counter than the previous.
-                // So if that isn't respected, we'll know that the keys weren't pressed in order.
-
-                for (int i = 1; i < keys.Length; i++) if (handlers[keys[i]].CheckState >= handlers[keys[i - 1]].CheckState) return false;
-
-                if (pressed) action();
-                return pressed;
-            }
-        }
     }
 
     /// <summary>
@@ -1128,9 +1426,9 @@ namespace PinkPact.Helpers
         }
 
         /// <summary>
-        /// Adds a <see cref="RoutedEventHandler"/> to an <see cref="UIElement"/> to be invoked when it's clicked.
+        /// Adds a <see cref="RoutedEventHandler"/> to <paramref name="element"/> to be invoked when it is clicked.
         /// <para>
-        /// If this method is called multiple times on the same <see cref="UIElement"/>, <paramref name="handler"/> will be added to the original handler.
+        /// If this method is called multiple times on the same <see cref="UIElement"/>, <paramref name="handler"/> will be added to the initial handler.
         /// </para>
         /// </summary>
         public static void AddClickHandler(UIElement element, RoutedEventHandler handler)
@@ -1147,6 +1445,24 @@ namespace PinkPact.Helpers
             element.MouseLeftButtonDown += OnElementLeftMouseButtonDown;
             element.MouseLeftButtonUp += OnElementLeftMouseButtonUp;
             element.MouseLeave += OnElementMouseLeave;
+        }
+
+        /// <summary>
+        /// Removes <paramref name="handler"/> from the invocation list of the previously added click handlers on <paramref name="element"/>.
+        /// </summary>
+        public static void RemoveClickHandler(UIElement element, RoutedEventHandler handler)
+        {
+            //If the element is already registered, just add the new handler to the rest
+            if (!clickDictionary.ContainsKey(element)) return;
+
+            clickDictionary[element][1] = (clickDictionary[element][1] as RoutedEventHandler) - handler;
+            if (clickDictionary[element][1] != null) return;
+   
+            clickDictionary.Remove(element);
+
+            element.MouseLeftButtonDown -= OnElementLeftMouseButtonDown;
+            element.MouseLeftButtonUp -= OnElementLeftMouseButtonUp;
+            element.MouseLeave -= OnElementMouseLeave;
         }
 
         /// <summary>
@@ -1392,7 +1708,7 @@ namespace PinkPact.Helpers
             string result = str;
 
             //Reset i after surpassing string length
-            for (int i = 1; result.Length <= length; i = i + 1 > str.Length ? 1 : i + 1) result += str.Substring(str.Length - i, i) + str.Substring(0, str.Length - i);
+            for (int i = 1; result.Length <= length; i = i + 1 > str.Length ? 1 : i + 1) result += string.Concat(str.AsSpan(str.Length - i, i), str.AsSpan(0, str.Length - i));
 
             //Ensure the length
             return result.Substring(0, length);

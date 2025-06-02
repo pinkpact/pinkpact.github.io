@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:PinkPact"
+                    xmlns:ctr="clr-namespace:PinkPact.Controls"
+                    xmlns:ctrs="clr-namespace:PinkPact.Controls.Specific"
+                    xmlns:cnv="clr-namespace:PinkPact.Converters"
+                    xmlns:efc="clr-namespace:PinkPact.Shaders">
+
+    <cnv:PointConverter x:Key="point"/>
+    <cnv:ArithmeticConverter x:Key="math"/>
+    <cnv:PathConverter x:Key="path"/>
+
+    <FontFamily x:Key="ipixelu">/Resources/Fonts/#I pixel u</FontFamily>
+    <FontFamily x:Key="sd_auto_pilot">/Resources/Fonts/#SD Auto Pilot</FontFamily>
+    <FontFamily x:Key="mini_pixel">/Resources/Fonts/#Mini Pixel-7</FontFamily>
+
+</ResourceDictionary>

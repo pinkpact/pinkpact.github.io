@@ -26,7 +26,7 @@ namespace PinkPact.Controls
         }
 
         /// <summary>
-        /// Gets or sets the delay between two consecutive trails.
+        /// Gets or sets the minimum delay between two consecutive trails.
         /// </summary>
         public TimeSpan TrailCooldown { get; set; }
 

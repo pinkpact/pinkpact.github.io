@@ -14,7 +14,6 @@ using PinkPact.Externals;
 using PinkPact.Shaders;
 using PinkPact.Helpers;
 
-
 using static System.Math;
 
 using static PinkPact.Helpers.MathHelper;
@@ -29,7 +28,6 @@ namespace PinkPact
     public partial class MainWindow : Window
     {
         readonly SolidColorBrush windowBgColor = new BrushConverter().ConvertFrom("#fef8f6") as SolidColorBrush;
-        readonly List<HotkeyActionChecker> hotkeys = new List<HotkeyActionChecker>();
 
         WpfScreen currentScreen;
         double lastWindowScale;
@@ -37,14 +35,11 @@ namespace PinkPact
         void Update()
         {
             UpdateWindowScale();
-
-            // Hotkey checks
-
-            if (IsActive) foreach (var hotkey in hotkeys) hotkey.Check();
         }
 
         public MainWindow()
         {
+            AudioHelper.Test();
             InitializeComponent();
 
             RenderOptions.SetBitmapScalingMode(mainBorder, BitmapScalingMode.HighQuality);
@@ -52,11 +47,11 @@ namespace PinkPact
 
             // Add hotkeys
 
-            hotkeys.Add(new HotkeyActionChecker(() => ToggleViewportBoxes(), Key.LeftCtrl, Key.D, Key.B));
-            hotkeys.Add(new HotkeyActionChecker(() => Maximize(WindowState == WindowState.Maximized), Key.F4));
-            //hotkeys.Add(new HotkeyActionChecker(() => format.ToggleTrailing(TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(1000)), Key.P));
-            //hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top + 100, format.Margin.Right, format.Margin.Bottom), Key.Up));
-            //hotkeys.Add(new HotkeyActionChecker(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top - 100, format.Margin.Right, format.Margin.Bottom), Key.Down));
+            HotkeyManager.Add("dbgbox", () => ToggleViewportBoxes(), Key.LeftCtrl, Key.D, Key.B);
+            HotkeyManager.Add("maximize", () => Maximize(WindowState == WindowState.Maximized), Key.F4);
+            //HotkeyManager.Add("trailing", () => format.ToggleTrailing(TimeSpan.FromMilliseconds(10), TimeSpan.FromMilliseconds(1000)), Key.P);
+            //HotkeyManager.Add(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top + 100, format.Margin.Right, format.Margin.Bottom), Key.Up);
+            //HotkeyManager.Add(() => format.Margin = new Thickness(format.Margin.Left, format.Margin.Top - 100, format.Margin.Right, format.Margin.Bottom), Key.Down);
 
             // Set up screen & viewport data too
 
@@ -82,11 +77,11 @@ namespace PinkPact
             ((Action)(async () =>
             {
                 var title = new Title(this);
-                await ui_layer.Children.Add(title);
+                await game_layer.Children.Add(title);
 
-                await Task.Delay(100);
-               // await title.Show();
-                await title.FirstSequence();
+                //await 250;
+                //await title.Show();
+                //await title.FirstSequence();
             }
             ))();
         }

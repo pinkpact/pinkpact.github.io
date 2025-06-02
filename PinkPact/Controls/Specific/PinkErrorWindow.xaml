@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="PinkPact.Controls.Specific.PinkErrorWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PinkPact.Controls.Specific"
+             xmlns:ctr="clr-namespace:PinkPact.Controls"
+             xmlns:cnv="clr-namespace:PinkPact.Converters"
+             xmlns:efc="clr-namespace:PinkPact.Shaders"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" 
+             d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid RenderOptions.BitmapScalingMode="NearestNeighbor">
+        <ctr:ImageButton x:Name="okBtn"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Right"
+                     Margin="0,0,30,25"
+                     Image="/Resources/OtherButtons/ok_btn.png"
+                     HoldImage="/Resources/OtherButtons/ok_btn_hold.png"
+                     HoverImage="/Resources/OtherButtons/ok_btn_hover.png"
+                     Width="150"
+                     Height="50">
+            <ctr:ImageButton.Effect>
+                <DropShadowEffect BlurRadius="0"
+                          ShadowDepth="2"
+                          Direction="-120"
+                          Color="#ce467f"
+                          RenderingBias="Quality"/>
+            </ctr:ImageButton.Effect>
+        </ctr:ImageButton>
+        <StackPanel Orientation="Horizontal"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center">
+            <Image Source="/Resources/Others/skull.png"
+               RenderOptions.BitmapScalingMode="NearestNeighbor"
+               Height="85"
+               Width="80"/>
+            <TextBlock Text="NOT CUTE ENOUGH !"
+                   Margin="20,0,0,0"
+                   FontFamily="{StaticResource mini_pixel}"
+                   Padding="0,10,0,0"
+                   FontSize="70"
+                   Foreground="#ce467f">
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</UserControl>

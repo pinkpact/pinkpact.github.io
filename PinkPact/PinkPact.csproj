@@ -1,162 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DB818957-D76C-4339-8BD8-BFBD1C1EF1B6}</ProjectGuid>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
-    <RootNamespace>PinkPact</RootNamespace>
-    <AssemblyName>PinkPact</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <StartupObject />
+    <ApplicationIcon>mini_logo.ico</ApplicationIcon>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+	<WarningsNotAsErrors>SYSLIB0011</WarningsNotAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>1701;1702;SYSLIB1045;CA1854;CA2101</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>mini_logo.ico</ApplicationIcon>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;SYSLIB1045;CA1854;CA2101</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <None Remove="FmodAudio.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="Animations\RandomDoubleAnimation.cs" />
-    <Compile Include="Controls\DrawingVisualHost.cs" />
-    <Compile Include="Controls\FormattedTextBlock.cs" />
-    <Compile Include="Controls\GifImage.cs" />
-    <Compile Include="Controls\GifImageButton.xaml.cs">
-      <DependentUpon>GifImageButton.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ImageButton.xaml.cs">
-      <DependentUpon>ImageButton.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\TrailGroup.cs" />
-    <Compile Include="Converters\ArithmeticConverter.cs" />
-    <Compile Include="Converters\ConditionalConverter.cs" />
-    <Compile Include="Converters\PathConverter.cs" />
-    <Compile Include="Converters\PointConverter.cs" />
-    <Compile Include="Converters\StringConverter.cs" />
-    <Compile Include="Converters\ThicknessConverter.cs" />
-    <Compile Include="Externals\ExclusiveRandom\ExclusiveInteger.cs" />
-    <Compile Include="Externals\ExclusiveRandom\ExclusiveRandom.cs" />
-    <Compile Include="Externals\ExclusiveRandom\ExclusiveString.cs" />
-    <Compile Include="Externals\Helpers.cs" />
-    <Compile Include="Externals\WpfScreen.cs" />
-    <Compile Include="Externals\PInvoke.cs" />
-    <Compile Include="Externals\Text\EventArgs.cs" />
-    <Compile Include="Externals\Text\FormattedText.cs" />
-    <Compile Include="Externals\Text\FormattedTextEffect.cs" />
-    <Compile Include="Externals\Text\FormattedTextEffectGroupCollection.cs" />
-    <Compile Include="Externals\Text\LinkHandler.cs" />
-    <Compile Include="Shaders\Chroma3DEffect.cs" />
-    <Compile Include="Shaders\ChunkGlitchEffect.cs" />
-    <Compile Include="Shaders\EffectDecorator.cs" />
-    <Compile Include="Shaders\GrayscaleEffect.cs" />
-    <Compile Include="Shaders\MonitorFilmEffect.cs" />
-    <Compile Include="Shaders\PixelateEffect.cs" />
-    <Compile Include="Shaders\StripeEffect.cs" />
-    <Compile Include="Shaders\StrokeEffect.cs" />
-    <Compile Include="Shaders\Vignette2Effect.cs" />
-    <Compile Include="Shaders\VignetteEffect.cs" />
-    <Compile Include="Title.xaml.cs">
-      <DependentUpon>Title.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Controls\GifImageButton.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\ImageButton.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="Title.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <Resource Include="Resources\Shaders\stripe_overlay.ps" />
-    <None Include="Shaders\Shader Code\vignette2.psc" />
     <Resource Include="Resources\Shaders\vignette2.ps" />
-    <None Include="Shaders\Shader Code\chroma3d.psc" />
-    <None Include="Shaders\Shader Code\chunk_glitch.psc" />
-    <None Include="Shaders\Shader Code\grayscale.psc" />
-    <None Include="Shaders\Shader Code\monitor_film.psc" />
-    <None Include="Shaders\Shader Code\pixelate.psc" />
-    <None Include="Shaders\Shader Code\stroke.psc" />
-    <None Include="Shaders\Shader Code\vignette.psc" />
     <Resource Include="Resources\Shaders\vignette.ps" />
     <Resource Include="Resources\Shaders\stroke.ps" />
     <Resource Include="Resources\Shaders\chunk_glitch.ps" />
@@ -167,13 +33,14 @@
     <Resource Include="Resources\Fonts\I-pixel-u.ttf" />
     <Resource Include="Resources\Fonts\sd_auto_pilot.ttf" />
     <Resource Include="Resources\Fonts\mini_pixel-7.ttf" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.5" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Reference Include="FmodAudio">
+      <HintPath>FmodAudio.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\BorderButtons\exit_btn.png" />
@@ -210,5 +77,38 @@
   <ItemGroup>
     <Resource Include="Resources\Title\title_screen.gif" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Resource Include="Resources\OtherButtons\ok_btn.png" />
+    <Resource Include="Resources\OtherButtons\ok_btn_hold.png" />
+    <Resource Include="Resources\OtherButtons\ok_btn_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Others\skull.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Others\heart.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Title\logo_title.png" />
+    <Resource Include="Resources\Others\heartsie1.png" />
+    <Resource Include="Resources\Others\heartsie2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Title\title_arrow.png" />
+    <Resource Include="Resources\Title\title_arrow_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Title\help_arrows.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Title\title_post.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Sounds\fall2.ogg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="fmod.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

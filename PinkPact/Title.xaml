@@ -6,9 +6,17 @@
              xmlns:local="clr-namespace:PinkPact"
              xmlns:efc="clr-namespace:PinkPact.Shaders"
              xmlns:ctr="clr-namespace:PinkPact.Controls"
+             xmlns:ctrs="clr-namespace:PinkPact.Controls.Specific"
              mc:Ignorable="d" 
              d:DesignHeight="1080" 
              d:DesignWidth="1920">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid x:Name="viewport"
           Background="Black"
           Width="1920"
@@ -33,7 +41,7 @@
                                   Opacity="0.3"
                                   Color="HotPink"/>
             </Grid.Effect>
-            
+
             <Image Stretch="Uniform"
                    Source="/Resources/final_pp_logo.png"/>
             <Grid>
@@ -69,11 +77,183 @@
                                      Color="Black"
                                      Intensity="0.2"/>
             </Grid.Effect>
-            <ctr:GifImage x:Name="titleBg"
+            <ctr:GifImage x:Name="actualTitleBg"
+                          Visibility="Collapsed"
                           FromPackUri="True"
                           DelayMs="300"
                           GifSource="Resources/Title/title_screen.gif"
                           AutoStart="True"/>
+            <Image x:Name="titleBg"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Source="/Resources/Title/title_post.png"/>
+        </Grid>
+
+        <StackPanel x:Name="notifScreen"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Left"
+                    Visibility="Collapsed"
+                    Margin="50,30,0,0">
+            <StackPanel.RenderTransform>
+                <TranslateTransform Y="0"/>
+            </StackPanel.RenderTransform>
+            <Image x:Name="heartImg"
+                   Opacity="0"
+                   Source="/Resources/Others/heart.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   RenderTransformOrigin="0.5,0.5"
+                   Width="50"
+                   Height="50">
+                <Image.RenderTransform>
+                    <ScaleTransform ScaleX="1"
+                                    ScaleY="1"/>
+                </Image.RenderTransform>
+            </Image>
+            <ctr:FormattedTextBlock x:Name="likeNotif"
+                                    Opacity="0"
+                                    Text="(c#f542f2)[ASHLEY] liked your post."
+                                    Margin="30,0,0,0"
+                                    FontFamily="{StaticResource mini_pixel}"
+                                    SequentialFading="False"
+                                    FontSize="80"
+                                    FadingDuration="75"/>
+        </StackPanel>
+
+        <Grid x:Name="actualTitleGrid"
+              Visibility="Collapsed">
+            <Grid x:Name="titleLogoGrid">
+                <Image x:Name="titleHeart1"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Source="/Resources/Others/heartsie1.png"
+                       VerticalAlignment="Top"
+                       Margin="-280,420,0,0"
+                       Width="100"
+                       Height="100">
+                    <Image.RenderTransform>
+                        <TranslateTransform Y="-5"/>
+                    </Image.RenderTransform>
+                </Image>
+                <Image x:Name="titleHeart2"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Source="/Resources/Others/heartsie2.png"
+                       VerticalAlignment="Top"
+                       Margin="200,410,0,0"
+                       Width="60"
+                       Height="60">
+                    <Image.RenderTransform>
+                        <TranslateTransform Y="15"/>
+                    </Image.RenderTransform>
+                </Image>
+                <Image x:Name="titleLogoImage"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Source="/Resources/Title/logo_title.png"
+                       Stretch="Uniform"
+                       VerticalAlignment="Top"
+                       RenderTransformOrigin="0.5,0.5"
+                       Margin="0,50,0,0"
+                       Width="800"
+                       Height="800">
+                    <Image.RenderTransform>
+                        <TranslateTransform Y="5"/>
+                    </Image.RenderTransform>
+                    <Image.Effect>
+                        <DropShadowEffect BlurRadius="200"
+                                          Opacity="0.5"
+                                          Color="White"/>
+                    </Image.Effect>
+                </Image>
+            </Grid>
+            <StackPanel x:Name="optionGrid"
+                        Margin="-70,0,0,160"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom">
+                <StackPanel x:Name="newGameOption"
+                            RenderTransformOrigin="0.5,0.5"
+                            Orientation="Horizontal">
+                    <StackPanel.Effect>
+                        <DropShadowEffect BlurRadius="50"
+                                          Color="Black"/>
+                    </StackPanel.Effect>
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <TranslateTransform X="0"/>
+                            <ScaleTransform/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Visibility="Hidden"
+                           Width="40"
+                           Height="60"/>
+                    <Image Source="/Resources/Title/title_arrow.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Width="60"
+                           Height="60"/>
+                    <TextBlock Text="New Game"
+                               Margin="30,0,0,0"
+                               Foreground="White"
+                               FontFamily="{StaticResource mini_pixel}"
+                               FontSize="100"/>
+                </StackPanel>
+                <StackPanel x:Name="continueOption"
+                            Margin="0,20,0,0"
+                            RenderTransformOrigin="0.5,0.5"
+                            Orientation="Horizontal">
+                    <StackPanel.Effect>
+                        <DropShadowEffect BlurRadius="50"
+                                          Color="Black"/>
+                    </StackPanel.Effect>
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <TranslateTransform X="0"/>
+                            <ScaleTransform/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Visibility="Hidden"
+                           Width="40"
+                           Height="60"/>
+                    <Image Source="/Resources/Title/title_arrow.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Width="60"
+                           Height="60"/>
+                    <TextBlock Text="Continue"
+                               Margin="30,0,0,0"
+                               Foreground="White"
+                               FontFamily="{StaticResource mini_pixel}"
+                               FontSize="100"/>
+                </StackPanel>
+                <StackPanel x:Name="settingsOption"
+                            Margin="0,20,0,0"
+                            RenderTransformOrigin="0.5,0.5"
+                            Orientation="Horizontal">
+                    <StackPanel.Effect>
+                        <DropShadowEffect BlurRadius="50"
+                                          Color="Black"/>
+                    </StackPanel.Effect>
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <TranslateTransform X="0"/>
+                            <ScaleTransform/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Visibility="Hidden"
+                           Width="40"
+                           Height="60"/>
+                    <Image Source="/Resources/Title/title_arrow.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Width="60"
+                           Height="60"/>
+                    <TextBlock Text="Settings"
+                               Margin="30,0,0,0"
+                               Foreground="White"
+                               FontFamily="{StaticResource mini_pixel}"
+                               FontSize="100"/>
+                </StackPanel>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

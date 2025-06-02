@@ -268,6 +268,12 @@ namespace PinkPact.Controls
         /// <summary>
         /// Initializes a new instance of the <see cref="FormattedTextBlock"/> class.
         /// </summary>
+        public FormattedTextBlock(bool noShadow)
+        {
+            if (!noShadow) Effect = new DropShadowEffect() { BlurRadius = 20, ShadowDepth = 10, RenderingBias = RenderingBias.Performance };
+            Handlers = handlers.AsReadOnly();
+        }
+
         public FormattedTextBlock()
         {
             Effect = new DropShadowEffect() { BlurRadius = 20, ShadowDepth = 10, RenderingBias = RenderingBias.Performance };
@@ -280,7 +286,7 @@ namespace PinkPact.Controls
         /// If <paramref name="current"/> is <see langword="true"/>, the Text property is replaced with CurrentText.
         /// </para>
         /// </summary>
-        public string GetFormattedText(bool current)
+        public string GetFormattedText(bool current = false)
         {
             return current ? executingText.AsFormatted() : text.AsFormatted();
         }
@@ -621,10 +627,20 @@ namespace PinkPact.Controls
 
                             case Txt.FormattedTextEffectType.Color:
                             {
+                                var stop = new GradientStop() { Offset = 0 };
+
+                                //Set up the gradient brush
+                                effect.Foreground = new LinearGradientBrush()
+                                {
+                                    StartPoint = new Point(0.5, 1),
+                                    EndPoint = new Point(0.5, 0),
+                                    GradientStops = { stop, new GradientStop(Colors.White, 1.8) }
+                                };
+
                                 //Check if the value is a single color first
                                 if (text.Effects[group / 2].EffectGroup[effectGroup].Value.GetType().Equals(typeof(Color)))
                                 {
-                                    effect.Foreground = new SolidColorBrush((Color)text.Effects[group / 2].EffectGroup[effectGroup].Value);
+                                    stop.Color = (Color)text.Effects[group / 2].EffectGroup[effectGroup].Value;
                                     break;
                                 }
 
@@ -641,8 +657,8 @@ namespace PinkPact.Controls
                                 colorClock.Controller.SeekAlignedToLastTick(TimeSpan.FromMilliseconds(50 * charEffect), TimeSeekOrigin.BeginTime);
 
                                 //Create the brush, assign it and begin the animation
-                                effect.Foreground = new SolidColorBrush((Color)colorAnim.GetCurrentValue(colorAnim.From, colorAnim.To, colorClock));
-                                effect.Foreground.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+                                stop.Color = (Color)colorAnim.GetCurrentValue(colorAnim.From, colorAnim.To, colorClock);
+                                stop.BeginAnimation(GradientStop.ColorProperty, colorAnim);
 
                                 break;
                             }

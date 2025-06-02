@@ -1,5 +1,8 @@
-﻿using PinkPact.Helpers;
+﻿using PinkPact.Externals;
+using PinkPact.Helpers;
 using PinkPact.Shaders;
+using PinkPact.Controls.Specific;
+using PinkPact.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +18,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace PinkPact
 {
@@ -26,60 +30,54 @@ namespace PinkPact
         internal const int fadeDuration = 2000,
                            shineDuration = 3250;
 
-        MainWindow parent;
+        int glitchMaxTime = 1500;
+        int selectedMenuOption = 1;
+        bool lastUp = false;
+
+        StackPanel selected;
+
+        readonly BitmapImage arrow = new BitmapImage(new Uri("pack://application:,,,/PinkPact;component/Resources/Title/title_arrow.png", UriKind.RelativeOrAbsolute)),
+                             selectedArrow = new BitmapImage(new Uri("pack://application:,,,/PinkPact;component/Resources/Title/title_arrow_selected.png", UriKind.RelativeOrAbsolute));
+
+        readonly MainWindow parent;
 
         public Title(MainWindow parent)
         {
             this.parent = parent;
             InitializeComponent();
+
+            newGameOption.Tag = (Action)(() => MessageBox.Show("oh boy i sure hope there was some interesting lore here"));
+            continueOption.Tag = (Action)(() => MessageBox.Show("continue"));
+            settingsOption.Tag = (Action)(() => MessageBox.Show("no settings yet, sorry"));
             //Loaded += (_, __) => _ = Show();
         }
 
         public async Task Show()
         {
-            parent.ui_layer.Effect = new MonitorFilmEffect() { Intensity = 0.3, Viewport = viewport };
+            parent.ui_layer.Effect = new MonitorFilmEffect() 
+            { 
+                Intensity = 0.3, 
+                StretchFactors = new Point(0.5, 0.5), 
+                Viewport = viewport 
+            };
 
             // Pop in logo
 
             logo.Visibility = Visibility.Visible;
             logo.Opacity = 0;
 
-            var logoPop = new DoubleAnimation(20, 0, TimeSpan.FromMilliseconds(fadeDuration));
-            logoPop.EasingFunction = new QuinticEase() { EasingMode = EasingMode.EaseOut };
-            Timeline.SetDesiredFrameRate(logoPop, 5);
-            logoTranslation.BeginAnimation(TranslateTransform.YProperty, logoPop);
-
-            // Fade in logo
-
-            var fadeAnim = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(fadeDuration));
-            fadeAnim.EasingFunction = new SineEase();
-            Timeline.SetDesiredFrameRate(fadeAnim, 5);
-            logo.BeginAnimation(OpacityProperty, fadeAnim);
-
-            var monitorAnim = new DoubleAnimation(0.3, 0, TimeSpan.FromMilliseconds((fadeDuration + shineDuration) / 2));
-            monitorAnim.EasingFunction = new ElasticEase() { EasingMode = EasingMode.EaseOut };
-            parent.ui_layer.Effect.BeginAnimation(MonitorFilmEffect.IntensityProperty, monitorAnim);
-
-            await Task.Delay(fadeDuration);
+            _ = TranslateTransform.YProperty.Animate<DoubleAnimation, double>(logoTranslation, 20, 0, fadeDuration, 5, easing: new QuinticEase() { EasingMode = EasingMode.EaseOut });
+            _ = OpacityProperty.Animate<DoubleAnimation, double>(logo, 0, 1, fadeDuration, 5, easing: new SineEase());
+            _ = MonitorFilmEffect.IntensityProperty.Animate<DoubleAnimation, double>(parent.ui_layer.Effect, 0.3, 0, fadeDuration * 3, easing: new ElasticEase() { EasingMode = EasingMode.EaseOut });
+            _ = MonitorFilmEffect.StretchFactorsProperty.Animate<PointAnimation, Point>(new Point(0.5, 0.5), new Point(1, 1), fadeDuration * 3, easing: new ElasticEase() { EasingMode = EasingMode.EaseOut });
+            
+            await fadeDuration;
 
             // Shine
-
-            var shineAnim = new DoubleAnimation(-250, 1050, TimeSpan.FromMilliseconds(shineDuration));
-            shineAnim.EasingFunction = new QuinticEase() { EasingMode = EasingMode.EaseInOut };
-
-            Timeline.SetDesiredFrameRate(shineAnim, 10);
-            shineTranslation.BeginAnimation(TranslateTransform.XProperty, shineAnim);
-
-            await Task.Delay(shineDuration);
+            await TranslateTransform.XProperty.Animate<DoubleAnimation, double>(shineTranslation, -250, 1050, shineDuration, 10, easing: new QuinticEase() { EasingMode = EasingMode.EaseInOut });
 
             // Fade out
-
-            fadeAnim.From = logo.Opacity;
-            fadeAnim.To = 0;
-
-            logo.BeginAnimation(OpacityProperty, fadeAnim);
-
-            await Task.Delay(fadeDuration);
+            await OpacityProperty.Animate<DoubleAnimation, double>(logo, logo.Opacity, 0, fadeDuration, 5, easing: new SineEase());
 
             // Value enforcement
 
@@ -96,44 +94,365 @@ namespace PinkPact
 
         public async Task FirstSequence()
         {
-            titleGrid.Children.Clear();
+            // Make the title grid visible
 
+            titleGrid.Children.Clear();
             await titleGrid.Children.Add(titleBg);
+            await titleGrid.Children.Add(actualTitleBg);
             titleGrid.Visibility = Visibility.Visible;
 
-            var fadeAnim = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(3000));
-            fadeAnim.EasingFunction = new SineEase();
-            Timeline.SetDesiredFrameRate(fadeAnim, 5);
-            titleGrid.BeginAnimation(OpacityProperty, fadeAnim);
+            // Animate it into appearance
 
-            await Task.Delay(3000);
+            await OpacityProperty.Animate<DoubleAnimation, double>(titleGrid, 0, 0.9, 3000, 5, false, easing: new SineEase());
+            await 1000;
 
+            // Wait for the grid to be clicked
+
+            parent.ui_layer.IsHitTestVisible = false;
+            Cursor = Cursors.Hand;
+            await this.AwaitClick();
+            parent.ui_layer.IsHitTestVisible = true;
+
+            // Begin glitching the title grid
+
+            bool doGlitching = true;
             var glitch = new ChunkGlitchEffect() { Intensity = 0, Seed = 0 };
             titleGrid.AddEffects(glitch);
 
-            await Task.Delay(500);
+            await 500;
+
+            // Set the glitch & vignette
 
             glitch.Intensity = 0.7;
             glitch.Seed = MathHelper.Random(1, 1000);
 
             titleVignette.Intensity = 0.6;
-            await Task.Delay(100);
+            await 1000;
 
-            glitch.Intensity = 0;
+            // Weaken the glitch and begin shaking and constant glitching
+
+            glitch.Intensity = 0.15;
+            ((Action)(async () =>
+            {
+                while (doGlitching)
+                {
+                    glitch.Seed = MathHelper.Random(1, 1000);
+                    await (int)MathHelper.Random(100, glitchMaxTime);
+                }
+            }
+            ))();
+
+            _ = titleGrid.ShakeWhile(1.5, 150, () => doGlitching);
+
+            // Maximize and disable maximization controls
 
             if (parent.WindowState != WindowState.Maximized) parent.Maximize();
             parent.viewportButtons.Visibility = Visibility.Collapsed;
+            HotkeyManager.Disable("maximize");
+            Cursor = Cursors.Arrow;
+
+            // Make the vignette more intense & add the film effect
 
             titleVignette.Intensity = 1.5;
-            titleGrid.Cursor = Cursors.Help;
 
             var film = new MonitorFilmEffect() { Intensity = 0.75, Viewport = parent.viewport };
-            parent.ui_layer.Effect = film;
+            parent.game_layer.Effect = film;
 
-            while (Mouse.LeftButton != MouseButtonState.Pressed)
+            // Animate the film effect
+            // Make the pixels more apparent
+            await MonitorFilmEffect.StretchFactorsProperty.Animate<PointAnimation, Point>(film, new Point(1, 1), new Point(0.5, 0.5), duration: 250, framerate: 60, easing: new QuinticEase() { EasingMode = EasingMode.EaseOut });
+            await 500;
+
+            // Soften the effect
+            _ = MonitorFilmEffect.IntensityProperty.Animate<DoubleAnimation, double>(film, 0.75, 0.25, duration: 500, reverse: true, easing: new QuinticEase() { EasingMode = EasingMode.EaseOut });
+            await MonitorFilmEffect.StretchFactorsProperty.Animate<PointAnimation, Point>(film, new Point(0.5, 0.5), new Point(1, 1), duration: 500, framerate: 60, easing: new SineEase() { EasingMode = EasingMode.EaseInOut });
+
+            // Bring it back
+            await MonitorFilmEffect.StretchFactorsProperty.Animate<PointAnimation, Point>(film, new Point(1, 1), new Point(0.5, 0.5), duration: 500, framerate: 60, easing: new CubicEase() { EasingMode = EasingMode.EaseOut });
+
+            //Show error messages
+            await 250;
+
+            // Show the error window
+
+            var wnd = new PinkWindow() { Title = "ERROR", WindowContent = new PinkErrorWindow(), Tag = "errwnd" };
+            wnd.ExitButton.IsEnabled = false;
+
+            _ = parent.ui_layer.Children.Add(wnd);
+            _ = wnd.Shake(5, 200);
+
+            // Wait for it to be clicked
+
+            bool clicked = false;
+            (wnd.WindowContent as PinkErrorWindow).Button.Click += (_, __) => clicked = true;
+            while (!clicked) await 5;
+
+            // Make it disappear
+
+            _ = wnd.Shake(12, 250);
+            await 100;
+            parent.ui_layer.Children.Remove(wnd);
+
+            // For the next 10 seconds, fill the screen with error windows
+
+            double dtime = 250;
+            int totalMs = 0,
+                time = 1000;
+
+            var watch = new Stopwatch();
+            var windows = new List<PinkWindow>();
+            for (int i = 0; watch.ElapsedMilliseconds < 10000; i++)
             {
+                // Make an error window appear
 
+                wnd = new PinkWindow()
+                {
+                    Title = (int)MathHelper.Random(1, 100) % 2 == 0 ? "ERROR" : "WARNING",
+                    VerticalAlignment = VerticalAlignment.Top,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    WindowContent = new PinkErrorWindow(),
+                    RenderTransformOrigin = new Point(0.5, 0.5),
+                    RenderTransform = new TranslateTransform(MathHelper.Random(i <= 1 ? 0 : -wnd.Width / 2, parent.game_layer.Width - wnd.Width / (i <= 1 ? 1 : 2)),
+                                                             MathHelper.Random(i <= 1 ? 0 : -wnd.Height / 2, parent.game_layer.Height - wnd.Height / (i <= 1 ? 1 : 2))),
+                };
+
+                wnd.ExitButton.IsEnabled = false;
+
+                _ = parent.ui_layer.Children.Add(wnd);
+                _ = wnd.Shake(5, 200);
+
+                // The first 2 windows can be clicked
+
+                if (i <= 1)
+                {
+                    // Wait for them to be clicked
+
+                    clicked = false;
+                    (wnd.WindowContent as PinkErrorWindow).Button.Click += (_, __) => clicked = true;
+                    while (!clicked) await 5;
+                    _ = wnd.Shake(12, 250);
+                }
+                else if (!watch.IsRunning) watch.Restart();
+
+                // Disable clicking them
+
+                (wnd.WindowContent as PinkErrorWindow).Button.IsEnabled = false;
+
+                // Dont await if first 2 windows
+
+                if (i <= 1)
+                {
+                    await 250;
+                    continue;
+                }
+
+                // Await and reduce waiting time and increase effects
+
+                await time;
+
+                totalMs += time;
+                time -= (int)dtime;
+                time = MathHelper.Clamp(time, 100);
+                dtime /= 1.25;
+
+                glitchMaxTime -= (int)dtime;
+                glitch.Intensity += 0.01;
+                titleVignette.Intensity += 0.05;
+
+                _ = titleGrid.Shake(3, (int)dtime);
             }
+            watch.Stop();
+
+            // Remove windows
+
+            doGlitching = false;
+            for (int i = 0; i < parent.ui_layer.Children.Count; i++)
+                if (parent.ui_layer.Children[i] is PinkWindow)
+                    parent.ui_layer.Children.RemoveAt(i--);
+
+            // Stop effects
+
+            parent.game_layer.Effect = null;
+            parent.game_layer.RemoveEffectWhere(_ => true);
+
+            parent.ui_layer.Effect = null;
+            parent.ui_layer.RemoveEffectWhere(_ => true);
+
+            titleGrid.Visibility = Visibility.Collapsed;
+
+            // Show notification
+
+            await 2500;
+            notifScreen.Visibility = Visibility.Visible;
+
+            _ = OpacityProperty.Animate<DoubleAnimation, double>(heartImg, 0, 1, 200, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+            _ = ScaleTransform.ScaleXProperty.Animate<DoubleAnimation, double>(heartImg.RenderTransform, 0, 1, 250, easing: new BackEase() { Amplitude = 0.75, EasingMode = EasingMode.EaseOut });
+            await ScaleTransform.ScaleYProperty.Animate<DoubleAnimation, double>(0, 1, 250, easing: new BackEase() { Amplitude = 0.75, EasingMode = EasingMode.EaseOut });
+
+            likeNotif.Opacity = 1;
+            await likeNotif.SetAsync(likeNotif.GetFormattedText());
+
+            // Fade out notification
+
+            await 2500;
+            _ = OpacityProperty.Animate<DoubleAnimation, double>(notifScreen, 1, 0, 250, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+            await TranslateTransform.YProperty.Animate<DoubleAnimation, double>(notifScreen.RenderTransform, 0, 50, 300, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+
+            // Remove everything but the title
+
+            await 2000;
+            viewport.Children.Remove(logo);
+            viewport.Children.Remove(notifScreen);
+            titleGrid.Children.Remove(titleBg);
+
+            actualTitleBg.Visibility = Visibility.Visible;
+
+            // Glitch the title screen for a second
+
+            titleVignette.Intensity = 3;
+            glitch.Intensity = 0.5;
+
+            titleGrid.Visibility = Visibility.Visible;
+
+            // Restore it
+
+            await 150;
+            glitch.Intensity = 0;
+            titleVignette.Intensity = 0.2;
+
+            parent.viewportButtons.Visibility = Visibility.Visible;
+            HotkeyManager.Enable("maximize");
+
+            await ShowTitle(false);
+        }
+
+        public async Task ShowTitle(bool fadeIn)
+        {
+            var logoAnim = new DoubleAnimation(5, -20, TimeSpan.FromSeconds(5))
+            {
+                EasingFunction = new SineEase() { EasingMode = EasingMode.EaseInOut },
+                RepeatBehavior = RepeatBehavior.Forever,
+                AutoReverse = true
+            };
+
+            Timeline.SetDesiredFrameRate(logoAnim, 30);
+            titleLogoImage.RenderTransform.BeginAnimation(TranslateTransform.YProperty, logoAnim);
+
+            var heartsieAnim = new DoubleAnimation(-5, 5, TimeSpan.FromSeconds(3))
+            {
+                EasingFunction = new SineEase() { EasingMode = EasingMode.EaseInOut },
+                RepeatBehavior = RepeatBehavior.Forever,
+                AutoReverse = true
+            };
+
+            Timeline.SetDesiredFrameRate(heartsieAnim, 10);
+            titleHeart1.RenderTransform.BeginAnimation(TranslateTransform.YProperty, heartsieAnim);
+
+            heartsieAnim.From = 15;
+            heartsieAnim.To = -5;
+            heartsieAnim.BeginTime = TimeSpan.FromSeconds(1);
+            titleHeart2.RenderTransform.BeginAnimation(TranslateTransform.YProperty, heartsieAnim);
+
+            titleGrid.Visibility = Visibility.Visible;
+            actualTitleGrid.Visibility = Visibility.Visible;
+
+            foreach (StackPanel opt in optionGrid.Children) (opt.Children[1] as Image).Source = new BitmapImage(new Uri("pack://application:,,,/PinkPact;component/Resources/Title/title_arrow.png", UriKind.RelativeOrAbsolute));
+
+            // TEMPORARY
+            ToggleMenuOption(1);
+
+            _ = SelectMenuOption(0, false);
+            Func<Key[], bool> pred = _ => actualTitleGrid.Visibility == Visibility.Visible;
+
+            HotkeyManager.Add("menuUp", MenuUp, pred, Key.Up);
+            HotkeyManager.Add("menuUp", MenuUp, pred, Key.W);
+
+            HotkeyManager.Add("menuDown", MenuDown, pred, Key.Down);
+            HotkeyManager.Add("menuDown", MenuDown, pred, Key.S);
+
+            HotkeyManager.Add("menuConfirm", () => (selected.Tag as Action)(), Key.Enter);
+
+            if (fadeIn)
+            {
+                foreach (StackPanel opt in optionGrid.Children) opt.Opacity = 0;
+                
+                _ = OpacityProperty.Animate<DoubleAnimation, double>(titleGrid, 0, 1, 2000, 5, easing: new SineEase());
+                _ = OpacityProperty.Animate<DoubleAnimation, double>(actualTitleGrid, 0, 1, 2000, 5, easing: new SineEase());
+
+                await 1000;
+                foreach (StackPanel opt in optionGrid.Children)
+                {
+                    _ = OpacityProperty.Animate<DoubleAnimation, double>(opt, 0, 1, 500, 24, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+                    _ = TranslateTransform.XProperty.Animate<DoubleAnimation, double>((opt.RenderTransform as TransformGroup).Children[0], -50, 0, 500, 24, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+
+                    await 150;
+                }
+            }
+        }
+
+        public int SelectMenuOption(int index, bool up)
+        {
+            if (!optionGrid.Children.Cast<StackPanel>().Any(x => x.IsEnabled)) return index;
+
+            if (index < 0) index = optionGrid.Children.Count - 1;
+            else if (index >= optionGrid.Children.Count) index = 0;
+
+            while (!optionGrid.Children[index].IsEnabled)
+            {
+                index += up ? -1 : 1;
+                if (index < 0) index = optionGrid.Children.Count - 1;
+                else if (index >= optionGrid.Children.Count) index = 0;
+            }
+
+            var opt = selected = optionGrid.Children[index] as StackPanel;
+            var group = opt.RenderTransform as TransformGroup;
+            var pos = group.Children[0] as TranslateTransform;
+            var scale = group.Children[1] as ScaleTransform;
+
+            scale.ScaleX = scale.ScaleY = 1.1;
+            pos.X = 30;
+
+            opt.Children[0].Visibility = Visibility.Visible;
+            (opt.Children[1] as Image).Source = selectedArrow;
+
+            for (int i = 0; i < optionGrid.Children.Count; i++)
+            {
+                if (i == index) continue;
+
+                opt = optionGrid.Children[i] as StackPanel;
+                group = opt.RenderTransform as TransformGroup;
+                pos = group.Children[0] as TranslateTransform;
+                scale = group.Children[1] as ScaleTransform;
+
+                scale.ScaleX = scale.ScaleY = 0.9;
+                pos.X = 0;
+
+                opt.Children[0].Visibility = Visibility.Hidden;
+                (opt.Children[1] as Image).Source = arrow;
+            }
+
+            return index;
+        }
+
+        public void ToggleMenuOption(int index)
+        {
+            if (index < 0 || index >= optionGrid.Children.Count) return;
+
+            var opt = optionGrid.Children[index] as StackPanel;
+            opt.IsEnabled = !opt.IsEnabled;
+            opt.Opacity = opt.IsEnabled ? 1 : 0.5;
+        }
+
+        void MenuUp()
+        {
+            for (int i = 0; i < (lastUp ? 1 : 3); i++) selectedMenuOption = SelectMenuOption(selectedMenuOption, true) - 1;
+            lastUp = true;
+        }
+
+        void MenuDown()
+        {
+            for (int i = 0; i < (lastUp ? 3 : 1); i++) selectedMenuOption = SelectMenuOption(selectedMenuOption, false) + 1;
+            lastUp = false;
         }
     }
 }

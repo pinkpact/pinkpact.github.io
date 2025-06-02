@@ -1,0 +1,111 @@
+﻿<UserControl x:Class="PinkPact.Controls.Specific.PinkWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PinkPact.Controls.Specific"
+             xmlns:ctr="clr-namespace:PinkPact.Controls"
+             xmlns:cnv="clr-namespace:PinkPact.Converters"
+             xmlns:efc="clr-namespace:PinkPact.Shaders"
+             mc:Ignorable="d" Height="300" Width="600"
+             UseLayoutRounding="True">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Border BorderBrush="Black"
+            BorderThickness="4">
+        <Grid x:Name="mainGrid"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Center"
+              Background="#fef8f6"
+              Width="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=Width}"
+              Height="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=Height}">
+
+            <Grid x:Name="bgDecorator">
+                <Polygon VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        Points="0 0 0 1 -1 1"
+                        Fill="#ca4b78">
+                    <Polygon.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding ElementName=mainGrid, Path=Width}"
+                                ScaleY="{Binding ElementName=mainGrid, Path=Height}"/>
+                    </Polygon.RenderTransform>
+                </Polygon>
+                <Rectangle Fill="#fdedee"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Margin="0,-2,0,0">
+                    <Rectangle.Width>
+                        <MultiBinding Converter="{StaticResource math}"
+                                      ConverterParameter="f{0}-20">
+                            <Binding ElementName="mainGrid"
+                                     Path="Width"/>
+                        </MultiBinding>
+                    </Rectangle.Width>
+                    <Rectangle.Height>
+                        <MultiBinding Converter="{StaticResource math}"
+                                      ConverterParameter="f{0}-15">
+                            <Binding ElementName="mainGrid"
+                                     Path="Height"/>
+                        </MultiBinding>
+                    </Rectangle.Height>
+                </Rectangle>
+            </Grid>
+            <Grid x:Name="windowBar"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              Margin="10,10,15,0"
+              Height="35">
+                <Grid.Width>
+                    <MultiBinding Converter="{StaticResource math}"
+                              ConverterParameter="f{0}-15">
+                        <Binding ElementName="mainGrid"
+                             Path="Width"/>
+                    </MultiBinding>
+                </Grid.Width>
+                <Rectangle x:Name="dragBar"
+                       Fill="#feaab9">
+                </Rectangle>
+                <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=local:PinkWindow}, Path=Title}"
+                       Margin="15,-2,0,0"
+                       FontSize="28"
+                       IsHitTestVisible="False"
+                       FontFamily="{StaticResource ipixelu}"
+                       Foreground="#fdfcf9">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="0"
+                                      Direction="-120"
+                                      ShadowDepth="3"
+                                      RenderingBias="Quality"
+                                      Color="#ce467f"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,8,2">
+                    <ctr:ImageButton x:Name="exitBtn"
+                                 Image="pack://application:,,,/PinkPact;component/Resources/BorderButtons/exit_btn.png"
+                                 HoldImage="pack://application:,,,/PinkPact;component/Resources/BorderButtons/exit_btn_hold.png"
+                                 HoverImage="pack://application:,,,/PinkPact;component/Resources/BorderButtons/exit_btn_hover.png"
+                                 Width="28"
+                                 Height="28">
+                        <ctr:ImageButton.Effect>
+                            <DropShadowEffect BlurRadius="0"
+                                      ShadowDepth="2"
+                                      Direction="-120"
+                                      Color="#ce467f"
+                                      RenderingBias="Quality"/>
+                        </ctr:ImageButton.Effect>
+                    </ctr:ImageButton>
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="windowContent"/>
+        </Grid>
+    </Border>
+</UserControl>

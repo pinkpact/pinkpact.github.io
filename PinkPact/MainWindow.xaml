@@ -20,13 +20,9 @@
         x:Name="mainWindow">
     <Window.Resources>
         <ResourceDictionary>
-            <cnv:PointConverter x:Key="point"/>
-            <cnv:ArithmeticConverter x:Key="math"/>
-            <cnv:PathConverter x:Key="path"/>
-
-            <FontFamily x:Key="ipixelu">/Resources/Fonts/#I pixel u</FontFamily>
-            <FontFamily x:Key="sd_auto_pilot">/Resources/Fonts/#SD Auto Pilot</FontFamily>
-            <FontFamily x:Key="mini_pixel">/Resources/Fonts/#Mini Pixel-7</FontFamily>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
     <Border x:Name="mainBorder"
@@ -172,7 +168,7 @@
                       RenderTransformOrigin="0.5,0.5"
                       Background="Transparent">
 
-                    <!--<ctr:FormattedTextBlock x:Name="format"
+                    <ctr:FormattedTextBlock x:Name="format"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
                                         Text="THE (w8,ff`Mini Pixel-7`,c#ff0048-#ff0000,lff`SD Auto Pilot`)[PINK] PACT"
@@ -180,7 +176,13 @@
                                         FadingDuration="50"
                                         FontFamily="{StaticResource mini_pixel}"
                                         Foreground="White"
-                                        FontSize="150"/>-->
+                                        FontSize="150">
+                        <ctr:FormattedTextBlock.RenderTransform>
+                            <TranslateTransform x:Name="testTransform"
+                                                X="0"
+                                                Y="0"/>
+                        </ctr:FormattedTextBlock.RenderTransform>
+                    </ctr:FormattedTextBlock>
 
                 </Grid>
 

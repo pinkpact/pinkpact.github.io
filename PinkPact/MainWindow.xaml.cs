@@ -39,7 +39,7 @@ namespace PinkPact
 
         public MainWindow()
         {
-            AudioHelper.Test();
+            //AudioHelper.Test();
             InitializeComponent();
 
             RenderOptions.SetBitmapScalingMode(mainBorder, BitmapScalingMode.HighQuality);

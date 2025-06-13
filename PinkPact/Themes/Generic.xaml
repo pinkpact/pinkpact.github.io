@@ -13,5 +13,7 @@
     <FontFamily x:Key="ipixelu">/Resources/Fonts/#I pixel u</FontFamily>
     <FontFamily x:Key="sd_auto_pilot">/Resources/Fonts/#SD Auto Pilot</FontFamily>
     <FontFamily x:Key="mini_pixel">/Resources/Fonts/#Mini Pixel-7</FontFamily>
+    <FontFamily x:Key="awesome">/Resources/Fonts/#Awesome</FontFamily>
+    <FontFamily x:Key="valentine">/Resources/Fonts/#Valentine Baby</FontFamily>
 
 </ResourceDictionary>

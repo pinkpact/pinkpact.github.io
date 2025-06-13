@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
@@ -25,8 +25,159 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="FmodAudio.dll" />
+    <None Remove="Resources\Backgrounds\bedroom.jpg" />
+    <None Remove="Resources\Backgrounds\bus.jpg" />
+    <None Remove="Resources\Backgrounds\char_selection.png" />
+    <None Remove="Resources\Backgrounds\elevator.jpg" />
+    <None Remove="Resources\Backgrounds\inside_manor.jpg" />
+    <None Remove="Resources\Backgrounds\kunt.png" />
+    <None Remove="Resources\Backgrounds\manor_day.jpg" />
+    <None Remove="Resources\Backgrounds\outside_door.jpg" />
+    <None Remove="Resources\Characters\Ashley\ashley_full.png" />
+    <None Remove="Resources\Characters\Selection\billie_hover.png" />
+    <None Remove="Resources\Characters\Selection\layla_hover.png" />
+    <None Remove="Resources\Characters\Selection\raquel_hover.png" />
+    <None Remove="Resources\Dialogue\Ashley\a_angry.png" />
+    <None Remove="Resources\Dialogue\Ashley\a_disgust.png" />
+    <None Remove="Resources\Dialogue\Ashley\a_happy.png" />
+    <None Remove="Resources\Dialogue\Ashley\a_normal.png" />
+    <None Remove="Resources\Dialogue\Ashley\a_sad.png" />
+    <None Remove="Resources\Dialogue\Ashley\a_surprised.png" />
+    <None Remove="Resources\Fonts\Awesome.ttf" />
+    <None Remove="Resources\Fonts\valentine.otf" />
+    <None Remove="Resources\OtherButtons\download_btn.png" />
+    <None Remove="Resources\OtherButtons\download_btn_hold.png" />
+    <None Remove="Resources\OtherButtons\download_btn_hover.png" />
+    <None Remove="Resources\Others\choose_outfit_bubble.png" />
+    <None Remove="Resources\Others\choose_outfit_larrow.png" />
+    <None Remove="Resources\Others\choose_outfit_rarrow.png" />
+    <None Remove="Resources\Others\dialogue_box.png" />
+    <None Remove="Resources\Others\hair_bubble.png" />
+    <None Remove="Resources\Others\letter_paper.png" />
+    <None Remove="Resources\Others\message.png" />
+    <None Remove="Resources\Others\notification.png" />
+    <None Remove="Resources\Others\pants_bubble.png" />
+    <None Remove="Resources\Others\shirt_bubble.png" />
+    <None Remove="Resources\Others\shoe_bubble.png" />
+    <None Remove="Resources\Outfits\Billie\B_base.png" />
+    <None Remove="Resources\Outfits\Billie\B_hair1.png" />
+    <None Remove="Resources\Outfits\Billie\B_hair2.png" />
+    <None Remove="Resources\Outfits\Billie\B_hair3.png" />
+    <None Remove="Resources\Outfits\Billie\B_pants1.png" />
+    <None Remove="Resources\Outfits\Billie\B_pants2.png" />
+    <None Remove="Resources\Outfits\Billie\B_pants3.png" />
+    <None Remove="Resources\Outfits\Billie\B_shirt1.png" />
+    <None Remove="Resources\Outfits\Billie\B_shirt2.png" />
+    <None Remove="Resources\Outfits\Billie\B_shirt3.png" />
+    <None Remove="Resources\Outfits\Billie\B_shoes1.png" />
+    <None Remove="Resources\Outfits\Billie\B_shoes2.png" />
+    <None Remove="Resources\Outfits\Billie\B_shoes3.png" />
+    <None Remove="Resources\Outfits\Layla\L_base.png" />
+    <None Remove="Resources\Outfits\Layla\L_hair1.png" />
+    <None Remove="Resources\Outfits\Layla\L_hair2.png" />
+    <None Remove="Resources\Outfits\Layla\L_hair3.png" />
+    <None Remove="Resources\Outfits\Layla\L_pants1.png" />
+    <None Remove="Resources\Outfits\Layla\L_pants2.png" />
+    <None Remove="Resources\Outfits\Layla\L_shirt1.png" />
+    <None Remove="Resources\Outfits\Layla\L_shirt2.png" />
+    <None Remove="Resources\Outfits\Layla\L_shirt3.png" />
+    <None Remove="Resources\Outfits\Layla\L_shoes1.png" />
+    <None Remove="Resources\Outfits\Layla\L_shoes2.png" />
+    <None Remove="Resources\Outfits\Layla\L_shoes3.png" />
+    <None Remove="Resources\Outfits\Raquel\R_base.png" />
+    <None Remove="Resources\Outfits\Raquel\R_hair1.png" />
+    <None Remove="Resources\Outfits\Raquel\R_hair2.png" />
+    <None Remove="Resources\Outfits\Raquel\R_hair3.png" />
+    <None Remove="Resources\Outfits\Raquel\R_pants1.png" />
+    <None Remove="Resources\Outfits\Raquel\R_pants2.png" />
+    <None Remove="Resources\Outfits\Raquel\R_pants3.png" />
+    <None Remove="Resources\Outfits\Raquel\R_shirt1.png" />
+    <None Remove="Resources\Outfits\Raquel\R_shirt2.png" />
+    <None Remove="Resources\Outfits\Raquel\R_shirt3.png" />
+    <None Remove="Resources\Outfits\Raquel\R_shoes1.png" />
+    <None Remove="Resources\Outfits\Raquel\R_shoes2.png" />
+    <None Remove="Resources\Sounds\Doors\creak.ogg" />
+    <None Remove="Resources\Sounds\Doors\doorbell_big.ogg" />
+    <None Remove="Resources\Sounds\Doors\doorbell_big_2.ogg" />
+    <None Remove="Resources\Sounds\Extra\letter_open.ogg" />
+    <None Remove="Resources\Sounds\Footsteps\steps_more_muffled.ogg" />
+    <None Remove="Resources\Sounds\Footsteps\steps_muffled.ogg" />
+    <None Remove="Resources\Sounds\Footsteps\tocuri_walking.ogg" />
+    <None Remove="Resources\Sounds\Voice\nword.ogg" />
+    <None Remove="Resources\Title\title_original.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Backgrounds\bedroom.jpg" />
+    <Resource Include="Resources\Backgrounds\bus.jpg" />
+    <Resource Include="Resources\Backgrounds\char_selection.png" />
+    <Resource Include="Resources\Backgrounds\elevator.jpg" />
+    <Resource Include="Resources\Backgrounds\inside_manor.jpg" />
+    <Resource Include="Resources\Backgrounds\kunt.png" />
+    <Resource Include="Resources\Backgrounds\manor_day.jpg" />
+    <Resource Include="Resources\Backgrounds\outside_door.jpg" />
+    <Resource Include="Resources\Characters\Ashley\ashley_full.png" />
+    <Resource Include="Resources\Characters\Selection\billie_hover.png" />
+    <Resource Include="Resources\Characters\Selection\layla_hover.png" />
+    <Resource Include="Resources\Characters\Selection\raquel_hover.png" />
+    <Resource Include="Resources\Dialogue\Ashley\a_angry.png" />
+    <Resource Include="Resources\Dialogue\Ashley\a_disgust.png" />
+    <Resource Include="Resources\Dialogue\Ashley\a_happy.png" />
+    <Resource Include="Resources\Dialogue\Ashley\a_normal.png" />
+    <Resource Include="Resources\Dialogue\Ashley\a_sad.png" />
+    <Resource Include="Resources\Dialogue\Ashley\a_surprised.png" />
+    <Resource Include="Resources\Fonts\awesome.ttf" />
+    <Resource Include="Resources\Fonts\valentine.otf" />
+    <Resource Include="Resources\OtherButtons\download_btn.png" />
+    <Resource Include="Resources\OtherButtons\download_btn_hold.png" />
+    <Resource Include="Resources\OtherButtons\download_btn_hover.png" />
+    <Resource Include="Resources\Others\choose_outfit_bubble.png" />
+    <Resource Include="Resources\Others\choose_outfit_larrow.png" />
+    <Resource Include="Resources\Others\choose_outfit_rarrow.png" />
+    <Resource Include="Resources\Others\dialogue_box.png" />
+    <Resource Include="Resources\Others\hair_bubble.png" />
+    <Resource Include="Resources\Others\letter_paper.png" />
+    <Resource Include="Resources\Others\message.png" />
+    <Resource Include="Resources\Others\notification.png" />
+    <Resource Include="Resources\Others\pants_bubble.png" />
+    <Resource Include="Resources\Others\shirt_bubble.png" />
+    <Resource Include="Resources\Others\shoe_bubble.png" />
+    <Resource Include="Resources\Outfits\Billie\B_base.png" />
+    <Resource Include="Resources\Outfits\Billie\B_hair1.png" />
+    <Resource Include="Resources\Outfits\Billie\B_hair2.png" />
+    <Resource Include="Resources\Outfits\Billie\B_hair3.png" />
+    <Resource Include="Resources\Outfits\Billie\B_pants1.png" />
+    <Resource Include="Resources\Outfits\Billie\B_pants2.png" />
+    <Resource Include="Resources\Outfits\Billie\B_pants3.png" />
+    <Resource Include="Resources\Outfits\Billie\B_shirt1.png" />
+    <Resource Include="Resources\Outfits\Billie\B_shirt2.png" />
+    <Resource Include="Resources\Outfits\Billie\B_shirt3.png" />
+    <Resource Include="Resources\Outfits\Billie\B_shoes1.png" />
+    <Resource Include="Resources\Outfits\Billie\B_shoes2.png" />
+    <Resource Include="Resources\Outfits\Billie\B_shoes3.png" />
+    <Resource Include="Resources\Outfits\Layla\L_base.png" />
+    <Resource Include="Resources\Outfits\Layla\L_hair1.png" />
+    <Resource Include="Resources\Outfits\Layla\L_hair2.png" />
+    <Resource Include="Resources\Outfits\Layla\L_hair3.png" />
+    <Resource Include="Resources\Outfits\Layla\L_pants1.png" />
+    <Resource Include="Resources\Outfits\Layla\L_pants2.png" />
+    <Resource Include="Resources\Outfits\Layla\L_shirt1.png" />
+    <Resource Include="Resources\Outfits\Layla\L_shirt2.png" />
+    <Resource Include="Resources\Outfits\Layla\L_shirt3.png" />
+    <Resource Include="Resources\Outfits\Layla\L_shoes1.png" />
+    <Resource Include="Resources\Outfits\Layla\L_shoes2.png" />
+    <Resource Include="Resources\Outfits\Layla\L_shoes3.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_base.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_hair1.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_hair2.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_hair3.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_pants1.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_pants2.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_pants3.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_shirt1.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_shirt2.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_shirt3.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_shoes1.png" />
+    <Resource Include="Resources\Outfits\Raquel\R_shoes2.png" />
     <Resource Include="Resources\Shaders\stripe_overlay.ps" />
     <Resource Include="Resources\Shaders\vignette2.ps" />
     <Resource Include="Resources\Shaders\vignette.ps" />
@@ -46,6 +197,9 @@
   <ItemGroup>
     <Reference Include="FmodAudio">
       <HintPath>FmodAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="System.DirectoryServices.AccountManagement">
+      <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\Framework\v4.0.30319\System.DirectoryServices.AccountManagement.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +233,15 @@
     <Resource Include="Resources\BorderButtons\max_subtle_hold.png" />
     <Resource Include="Resources\BorderButtons\min_btn_subtle.png" />
     <Resource Include="Resources\BorderButtons\min_subtle_hold.png" />
+    <Resource Include="Resources\Sounds\Doors\creak.ogg" />
+    <Resource Include="Resources\Sounds\Doors\doorbell_big.ogg" />
+    <Resource Include="Resources\Sounds\Doors\doorbell_big_2.ogg" />
+    <Resource Include="Resources\Sounds\Extra\letter_open.ogg" />
+    <Resource Include="Resources\Sounds\Footsteps\steps_more_muffled.ogg" />
+    <Resource Include="Resources\Sounds\Footsteps\steps_muffled.ogg" />
+    <Resource Include="Resources\Sounds\Footsteps\tocuri_walking.ogg" />
+    <Resource Include="Resources\Sounds\Voice\nword.ogg" />
+    <Resource Include="Resources\Title\title_original.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Title\title_screen.gif" />
@@ -110,11 +273,19 @@
     <Resource Include="Resources\Title\title_post.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Sounds\fall2.ogg" />
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Update="fmod.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 </Project>

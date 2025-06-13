@@ -1,43 +1,43 @@
-﻿using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Windows.Media.Animation;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
-using System.Windows.Media.Effects;
-using System.Collections.Generic;
-using System.Windows.Controls;
-using System.Threading.Tasks;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Input;
-using System.Globalization;
-using System.Net.Sockets;
-using System.Diagnostics;
-using System.Reflection;
-using System.Windows;
-using System.Text;
-using System.Data;
-using System.Linq;
-using System.Net;
-using System.IO;
-using System;
-
-using static PinkPact.PInvoke;
-using static System.Math;
-
-using PinkPact.Shaders;
-using PinkPact.Controls;
-using PinkPact.Animations;
-using System.Xml.Linq;
-
+﻿using FmodAudio;
 using FmodAudio.Base;
 using FmodAudio.DigitalSignalProcessing;
-using FmodAudio;
 using FmodAudio.DigitalSignalProcessing.Effects;
+using PinkPact.Animations;
+using PinkPact.Controls;
 using PinkPact.Externals;
+using PinkPact.Playback;
+using PinkPact.Shaders;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Xml.Linq;
+using static PinkPact.PInvoke;
+using static System.Math;
 
 #pragma warning disable SYSLIB0011
 #pragma warning disable SYSLIB0014
@@ -54,39 +54,9 @@ namespace PinkPact.Helpers
             return (uint)(ms * (double)frequency / 1000);
         }
 
-        public static void Test()
+        public static byte[] GetAudioResource(string resource, string ext)
         {
-            var sys = Fmod.CreateSystem();
-            sys.Init(100);
-
-            var file = ResourceHelper.GetResource("Resources/Sounds/fall2.ogg");
-
-            var sound = sys.CreateSound(@"D:\games\Undertale Yellow\mus\genobattle_yellow.ogg");
-            ChannelGroup ch = sys.CreateChannelGroup("1");
-
-            float speed = 1f;
-            float pitch = 0.75f;
-            float tempo = 0.25f; 
-
-            Dsp dsp = sys.CreateDSPByType(DSPType.PitchShift);
-            dsp.SetParameterFloat((int)DspPitchShift.Pitch, pitch / speed);
-
-            Channel playing = sys.PlaySound(sound, ch, true);
-            playing.AddDSP(ChannelControlDSPIndex.DspHead, dsp);
-            playing.Pitch = tempo * speed;
-            playing.Paused = false;
-
-            ((Action)(async () =>
-            {
-                while (playing.IsPlaying)
-                {
-                    Console.WriteLine($"{playing.GetPosition(TimeUnit.MS)} / {sound.GetLength(TimeUnit.MS)}");
-                    await 1;
-                }
-            }
-            ))();
-            HotkeyManager.Add(() => playing.SetPosition(TimeUnit.MS, playing.GetPosition(TimeUnit.MS) + 1000), Key.Right);
-            HotkeyManager.Add(() => playing.SetPosition(TimeUnit.MS, playing.GetPosition(TimeUnit.MS) - 1000), Key.Left);
+            return ResourceHelper.GetResource("Resources/Sounds/" + resource);
         }
     }
 
@@ -100,11 +70,23 @@ namespace PinkPact.Helpers
         /// </summary>
         public static byte[] GetResource(string resource)
         {
-            var res = Application.GetResourceStream(new Uri("pack://application:,,,/PinkPact;component/" + resource.TrimStart('/'), UriKind.RelativeOrAbsolute));
+            var res = Application.GetResourceStream(ToPackUri(resource));
             using var stream = new MemoryStream();
 
             res.Stream.CopyTo(stream);
             return stream.ToArray();
+        }
+
+        public static Image GetImageResource(string resource, BitmapScalingMode scaling = BitmapScalingMode.NearestNeighbor)
+        {
+            var img = new Image() { Source = new BitmapImage(ToPackUri(resource)), Stretch = Stretch.Uniform };
+            RenderOptions.SetBitmapScalingMode(img, scaling);
+            return img;
+        }
+
+        public static Uri ToPackUri(string resource)
+        {
+            return new Uri("pack://application:,,,/PinkPact;component/" + resource.TrimStart('/'), UriKind.RelativeOrAbsolute);
         }
     }
 
@@ -634,6 +616,34 @@ namespace PinkPact.Helpers
             util.Toggle();
                 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the name of the user currently logged into the computer.
+        /// </summary>
+        public static string GetLocalUsername()
+        {
+            return System.DirectoryServices.AccountManagement.UserPrincipal.Current.DisplayName;
+        }
+
+        public static Image Render(this FrameworkElement element)
+        {
+            var rtb = new RenderTargetBitmap((int)element.ActualWidth, (int)element.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(element);
+
+            var png = new PngBitmapEncoder();
+            png.Frames.Add(BitmapFrame.Create(rtb));
+
+            using var stream = new MemoryStream();
+            png.Save(stream);
+
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.StreamSource = stream;
+            bmp.EndInit();
+
+            return new Image() { Source = bmp };
         }
 
         #region Utilitary
@@ -1202,7 +1212,8 @@ namespace PinkPact.Helpers
             bool reverse = false,
             bool awaitReversal = true,
             EasingFunctionBase easing = null,
-            FillBehavior fillBehavior = FillBehavior.HoldEnd
+            FillBehavior fillBehavior = FillBehavior.HoldEnd,
+            CancellationToken cancelToken = default
         )
             where TAnim : AnimationTimeline, new()
         {
@@ -1218,7 +1229,7 @@ namespace PinkPact.Helpers
             element.BeginAnimation(property, anim);
             last = element;
 
-            await Task.Delay(duration * (reverse && awaitReversal ? 2 : 1));
+            await Task.Delay(duration * (reverse && awaitReversal ? 2 : 1), cancelToken);
         }
 
         public static async Task Animate<TAnim, T>
@@ -1231,7 +1242,8 @@ namespace PinkPact.Helpers
             bool reverse = false,
             bool awaitReversal = true,
             EasingFunctionBase easing = null,
-            FillBehavior fillBehavior = FillBehavior.HoldEnd
+            FillBehavior fillBehavior = FillBehavior.HoldEnd,
+            CancellationToken cancelToken = default
         )
             where TAnim : AnimationTimeline, new()
         {
@@ -1247,7 +1259,7 @@ namespace PinkPact.Helpers
 
             Timeline.SetDesiredFrameRate(anim, framerate);
             last.BeginAnimation(property, anim);
-            await Task.Delay(duration * (reverse && awaitReversal ? 2 : 1));
+            await Task.Delay(duration * (reverse && awaitReversal ? 2 : 1), cancelToken);
         }
     }
     

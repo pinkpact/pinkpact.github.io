@@ -4,6 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PinkPact"
+             xmlns:efc="clr-namespace:PinkPact.Shaders"
+             xmlns:ctr="clr-namespace:PinkPact.Controls"
+             xmlns:ctrs="clr-namespace:PinkPact.Controls.Specific"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
     <UserControl.Resources>
@@ -17,6 +20,377 @@
           Background="Black"
           Width="1920"
           Height="1080">
+        <Grid x:Name="introGrid"
+              Opacity="0"
+              Visibility="Collapsed">
+            <ctr:FormattedTextBlock x:Name="introTitle"
+                                    FontSize="200"
+                                    SequentialFading="False"
+                                    FadingDuration="1500"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   FontFamily="{StaticResource sd_auto_pilot}"/>
+        </Grid>
+        <Grid x:Name="chooseGrid"
+              Opacity="0"
+              Visibility="Collapsed">
+            <Image x:Name="charSelectBg"
+                   Source="/Resources/Backgrounds/char_selection.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Opacity="1"
+                   Stretch="Uniform"/>
+            <Grid x:Name="raq_option"
+                  Opacity="0">
+                <Image Source="/Resources/Characters/Selection/raquel_hover.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Margin="0,100,0,0"
+                   Stretch="Uniform"
+                   Width="490"/>
+                <TextBlock Text="RAQUEL"
+                           Foreground="White"
+                           FontSize="100"
+                           FontFamily="{StaticResource mini_pixel}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Margin="0,950,0,0"/>
+                <Grid.RenderTransform>
+                    <TranslateTransform/>
+                </Grid.RenderTransform>
+            </Grid>
+            <Grid x:Name="billie_option"
+                  Opacity="0">
+                <Image Source="/Resources/Characters/Selection/billie_hover.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Margin="1000,100,0,0"
+                   Stretch="Uniform"
+                   Width="490"/>
+                <TextBlock Text="BILLIE"
+                               Foreground="White"
+                               FontSize="100"
+                               FontFamily="{StaticResource mini_pixel}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Margin="1000,950,0,0"/>
+                <Grid.RenderTransform>
+                    <TranslateTransform/>
+                </Grid.RenderTransform>
+            </Grid>
+            <Grid x:Name="layla_option"
+                  Opacity="0">
+                <Image Source="/Resources/Characters/Selection/layla_hover.png"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="-1000,100,0,0"
+                       Stretch="Uniform"
+                       Opacity="1"
+                       Width="490"/>
+                <TextBlock Text="LAYLA"
+                               Foreground="White"
+                               FontSize="100"
+                               FontFamily="{StaticResource mini_pixel}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Margin="-1000,950,0,0"/>
+                <Grid.RenderTransform>
+                    <TranslateTransform/>
+                </Grid.RenderTransform>
+            </Grid>
+
+            <Image x:Name="char_larrow"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Stretch="Uniform"
+                   Width="80"
+                   HorizontalAlignment="Left"
+                   Margin="80,0,0,0"
+                   Source="/Resources/Others/choose_outfit_larrow.png">
+                <Image.RenderTransform>
+                    <TranslateTransform/>
+                </Image.RenderTransform>
+            </Image>
+            <Image x:Name="char_rarrow"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Stretch="Uniform"
+                   Width="80"
+                   HorizontalAlignment="Right"
+                   Margin="0,0,80,0"
+                   Source="/Resources/Others/choose_outfit_rarrow.png">
+                <Image.RenderTransform>
+                    <TranslateTransform/>
+                </Image.RenderTransform>
+            </Image>
+            <ctr:FormattedTextBlock x:Name="chooseCharTitle"
+                                    VerticalAlignment="Top"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,65,0,0"
+                                    FontSize="120"
+                                    FontFamily="{StaticResource mini_pixel}"/>
+        </Grid>
+        <Grid x:Name="outfitGrid"
+              Opacity="0"
+              Visibility="Collapsed">
+            <Image Source="/Resources/Backgrounds/kunt.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Opacity="1"
+                   Stretch="Uniform"/>
+            <Image Source="/Resources/Others/choose_outfit_bubble.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Stretch="Uniform"
+                   Width="800"/>
+
+            <ctr:FormattedTextBlock x:Name="outfitTitleText"
+                                    Text="CHOOSE&#xA;YOUR&#xA;(c#ff99dc-#ff3bbc,w3)[OUTFIT]&#xA;(c#bda0b8,f0.5)[\(Enter to Confirm\)]"
+                                    TextAlignment="Center"
+                                    FontSize="140"
+                                    LineStackingStrategy="BlockLineHeight"
+                                    LineHeight="110"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Margin="90,0,0,0"
+                                    FontFamily="{StaticResource mini_pixel}"/>
+
+            <Image x:Name="outfitLeftArrow"
+                   Source="/Resources/Others/choose_outfit_larrow.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Stretch="Uniform"
+                   VerticalAlignment="Bottom"
+                   Margin="-500,0,0,30"
+                   Width="80">
+                <Image.RenderTransform>
+                    <TranslateTransform X="0"/>
+                </Image.RenderTransform>
+            </Image>
+            <Image x:Name="outfitRightArrow"
+                   Source="/Resources/Others/choose_outfit_rarrow.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Stretch="Uniform"
+                   VerticalAlignment="Bottom"
+                   Margin="500,0,0,30"
+                   Width="80">
+                <Image.RenderTransform>
+                    <TranslateTransform X="0"/>
+                </Image.RenderTransform>
+            </Image>
+
+            <Grid x:Name="bubbles">
+                <StackPanel x:Name="hairBubble"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,350,600">
+                    <Image Source="/Resources/Others/hair_bubble.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Stretch="Uniform"
+                           Width="175"/>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Stretch="Uniform"
+                           Margin="0,0,-100,0"
+                           Width="40"/>
+                </StackPanel>
+
+                <StackPanel x:Name="shirtBubble"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,250,200">
+                    <Image  Source="/Resources/Others/shirt_bubble.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Stretch="Uniform"
+                           Width="175"/>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Stretch="Uniform"
+                           Margin="0,0,-100,0"
+                           Width="40"/>
+                </StackPanel>
+
+                <StackPanel x:Name="pantsBubble"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,250,-200">
+                    <Image Source="/Resources/Others/pants_bubble.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Stretch="Uniform"
+                           Width="175"/>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                               Stretch="Uniform"
+                               Margin="0,0,-100,0"
+                               Width="40"/>
+                </StackPanel>
+
+                <StackPanel x:Name="shoeBubble"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,350,-600">
+                    <Image Source="/Resources/Others/shoe_bubble.png"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Stretch="Uniform"
+                           Width="175"/>
+                    <Image Source="/Resources/Title/help_arrows.png"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            Stretch="Uniform"
+                            Margin="0,0,-100,0"
+                            Width="40"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,0,0,50"
+                  x:Name="charModelGrid">
+                
+                <Image x:Name="charBase"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Stretch="Uniform"
+                       Width="450">
+                </Image>
+                <Image x:Name="charShoes"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Stretch="Uniform"
+                       Width="450">
+                    <Image.RenderTransform>
+                        <TranslateTransform/>
+                    </Image.RenderTransform>
+                </Image>
+                <Image x:Name="charPants"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Stretch="Uniform"
+                       Width="450">
+                    <Image.RenderTransform>
+                        <TranslateTransform/>
+                    </Image.RenderTransform>
+                </Image>
+                <Image x:Name="charTop"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Stretch="Uniform"
+                       Width="450">
+                    <Image.RenderTransform>
+                        <TranslateTransform/>
+                    </Image.RenderTransform>
+                </Image>
+                <Image x:Name="charHair"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       Stretch="Uniform"
+                       Width="450">
+                    <Image.RenderTransform>
+                        <TranslateTransform/>
+                    </Image.RenderTransform>
+                </Image>
+                
+                <Grid.Effect>
+                    <DropShadowEffect BlurRadius="100"
+                                          ShadowDepth="1"
+                                          Color="Black"
+                                          Opacity="0.7"/>
+                </Grid.Effect>
+                <Grid.RenderTransform>
+                    <TranslateTransform Y="5"/>
+                </Grid.RenderTransform>
+            </Grid>
+        </Grid>
+
+        <ctr:FormattedTextBlock x:Name="ashleyConfirmationText"
+                                    FontSize="130"
+                                    Visibility="Collapsed"
+                                    Foreground="White"
+                                    Opacity="0"
+                                    LineStackingStrategy="BlockLineHeight"
+                                    LineHeight="110"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,0,400,0"
+                                    FontFamily="{StaticResource mini_pixel}"/>
+        <ctr:FormattedTextBlock x:Name="ashleySeeYouText"
+                                    FontSize="100"
+                                    Foreground="White"
+                                    Visibility="Collapsed"
+                                    Opacity="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,400,100,0"
+                                    FontFamily="{StaticResource mini_pixel}"/>
+
+        <Grid x:Name="dialogueBox"
+              Opacity="0"
+              VerticalAlignment="Bottom"
+            HorizontalAlignment="Center"
+            Margin="0,0,0,50">
+            <Image x:Name="dialoguePortrait"
+                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                    Stretch="Uniform"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,-50"
+                   Width="1000"/>
+            <Image Source="/Resources/Others/dialogue_box.png"
+               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   VerticalAlignment="Bottom"
+               Stretch="Uniform"
+               Opacity="0.85"
+               Width="1700"/>
             
+            <TextBlock x:Name="dialogueAuthor"
+                       FontFamily="{StaticResource mini_pixel}"
+                       FontSize="70"
+                       VerticalAlignment="Bottom"
+                       Margin="80,5,0,316"
+                       Foreground="Black"/>
+            <ctr:FormattedTextBlock x:Name="dialogueText"
+                            FontSize="80"
+                            VerticalAlignment="Bottom"
+                            Foreground="White"
+                            Margin="80,0,0,210"
+                            FontFamily="{StaticResource mini_pixel}"/>
+            <Image x:Name="dialogueBoxSkipArrow"
+                   Source="/Resources/Title/title_arrow.png"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   Stretch="Uniform"
+                   Width="50"
+                   Opacity="0"
+                   VerticalAlignment="Bottom"
+                   HorizontalAlignment="Right"
+                   Margin="0,0,20,30">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <TranslateTransform/>
+                        <RotateTransform CenterX="0.5"
+                         CenterY="0.5"
+                         Angle="90"/>
+                    </TransformGroup>
+
+                </Image.RenderTransform>
+            </Image>
+        </Grid>
+        <Image x:Name="dialogueSkipArrow"
+               Source="/Resources/Title/title_arrow.png"
+               RenderOptions.BitmapScalingMode="NearestNeighbor"
+               Stretch="Uniform"
+               Width="50"
+               Opacity="0"
+               VerticalAlignment="Bottom"
+               HorizontalAlignment="Right"
+               Margin="0,0,0,20">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform/>
+                    <RotateTransform CenterX="0.5"
+                                 CenterY="0.5"
+                                 Angle="90"/>
+                </TransformGroup>
+
+            </Image.RenderTransform>
+        </Image>
     </Grid>
 </UserControl>

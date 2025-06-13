@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PinkPact.Audio
+namespace PinkPact.Data
 {
-    public class Sound
+    public enum Character
     {
-
+        LAYLA,
+        BILLIE,
+        RAQUEL
     }
 }

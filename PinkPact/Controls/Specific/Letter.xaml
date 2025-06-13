@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="PinkPact.Controls.Specific.Letter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PinkPact.Controls.Specific"
+             mc:Ignorable="d"
+             Width="340"
+             Height="500">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Themes/Generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Image Source="/Resources/Others/letter_paper.png"
+               RenderOptions.BitmapScalingMode="NearestNeighbor"
+               Stretch="Uniform"/>
+        <TextBlock FontFamily="{StaticResource valentine}"
+                   Margin="35,60,0,0"
+                   TextWrapping="Wrap"
+                   LineStackingStrategy="BlockLineHeight"
+                   LineHeight="13"
+                   FontSize="10"
+                   Foreground="#210057"
+                   HorizontalAlignment="Left"
+                   Width="270">
+            <Run Text="Dear"/>
+            <Run x:Name="playerNameRun"
+                 Text="Player"
+                 Foreground="DarkRed"/><Run Text=",&#xA;&#xA;"/>
+            <Run Text="We’ve been watching you. We heard you just moved in town and we thought your insta looked so cool and you’d be a great fit at Ashley manor! You seem like someone who would fit right in at Ashley Mansion. It is a perfect place to build connections that will last forever, and we think you’ll love it here.&#xA;&#xA;All you need to do is be pretty and proper, and we’ll take care of the rest. We’re looking for someone special, and we believe you could be the one.&#xA;&#xA;Pack your bags. We’ve already arranged everything for you.&#xA;&#xA;Come to Ashley Mansion and meet the sisters. Don’t worry about fitting in, we’ll make sure you feel at home. After all, we all have our place.&#xA;&#xA;We can’t wait to welcome you!&#xA;&#xA;We do have some requirements because you’re moving in with us or whatever. It’s some legal bs idk. Anyway we need like your birth certificate and proof that you graduated and are in college. We’re kind of an exclusivist organization and a lot of people try to get in, you know how it is. Just some papers we’ll hold on so you don’t have to worry about a thing and can enjoy your time here.&#xA;&#xA;Warmly,&#xA;Ashley and the Sisters of Ashley Mansion&#xA;"/>
+        </TextBlock>
+    </Grid>
+</UserControl>

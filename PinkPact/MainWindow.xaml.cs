@@ -1,24 +1,24 @@
-﻿using System.Windows.Media.Animation;
+﻿using PinkPact.Animations;
+using PinkPact.Controls.Specific;
+using PinkPact.Externals;
+using PinkPact.Helpers;
+using PinkPact.Playback;
+using PinkPact.Shaders;
+using System;
 using System.Collections.Generic;
-using System.Windows.Controls;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Shapes;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using PinkPact.Animations;
-using System.Windows;
-using System.Linq;
-using System;
-
-using PinkPact.Externals;
-using PinkPact.Shaders;
-using PinkPact.Helpers;
-
-using static System.Math;
-
-using static PinkPact.Helpers.MathHelper;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using static PinkPact.Helpers.KeyboardHelper;
-
+using static PinkPact.Helpers.MathHelper;
+using static PinkPact.Properties.Settings;
+using static System.Math;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace PinkPact
 {
@@ -39,7 +39,9 @@ namespace PinkPact
 
         public MainWindow()
         {
-            //AudioHelper.Test();
+            AudioChannel.RegisterChannel("sfx");
+            AudioChannel.RegisterChannel("music");
+
             InitializeComponent();
 
             RenderOptions.SetBitmapScalingMode(mainBorder, BitmapScalingMode.HighQuality);
@@ -74,14 +76,21 @@ namespace PinkPact
 
             CompositionTarget.Rendering += (_, __) => Update();
 
+            if (Default.fullscreen) Maximize();
             ((Action)(async () =>
             {
                 var title = new Title(this);
                 await game_layer.Children.Add(title);
 
-                //await 250;
-                //await title.Show();
-                //await title.FirstSequence();
+                await 250;
+                await title.ShowLogo();
+                if (Default.firstLaunch)
+                {
+                    await title.FirstSequence();
+                    Default.firstLaunch = false;
+                    Default.Save();
+                }
+                else await title.ShowTitle(true);
             }
             ))();
         }
@@ -123,6 +132,8 @@ namespace PinkPact
             viewportScale.ScaleX = viewportScale.ScaleY = unmaximize ? 0.487 : scale;
             windowScale.ScaleX = windowScale.ScaleY = unmaximize ? lastWindowScale : (1d / currentScreen.ScalingFactor);
 
+            Default.fullscreen = WindowState == WindowState.Maximized;
+            Default.Save();
             GC.Collect();
         }
 

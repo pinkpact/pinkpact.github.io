@@ -88,37 +88,6 @@
                    Source="/Resources/Title/title_post.png"/>
         </Grid>
 
-        <StackPanel x:Name="notifScreen"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Left"
-                    Visibility="Collapsed"
-                    Margin="50,30,0,0">
-            <StackPanel.RenderTransform>
-                <TranslateTransform Y="0"/>
-            </StackPanel.RenderTransform>
-            <Image x:Name="heartImg"
-                   Opacity="0"
-                   Source="/Resources/Others/heart.png"
-                   RenderOptions.BitmapScalingMode="NearestNeighbor"
-                   RenderTransformOrigin="0.5,0.5"
-                   Width="50"
-                   Height="50">
-                <Image.RenderTransform>
-                    <ScaleTransform ScaleX="1"
-                                    ScaleY="1"/>
-                </Image.RenderTransform>
-            </Image>
-            <ctr:FormattedTextBlock x:Name="likeNotif"
-                                    Opacity="0"
-                                    Text="(c#f542f2)[ASHLEY] liked your post."
-                                    Margin="30,0,0,0"
-                                    FontFamily="{StaticResource mini_pixel}"
-                                    SequentialFading="False"
-                                    FontSize="80"
-                                    FadingDuration="75"/>
-        </StackPanel>
-
         <Grid x:Name="actualTitleGrid"
               Visibility="Collapsed">
             <Grid x:Name="titleLogoGrid">

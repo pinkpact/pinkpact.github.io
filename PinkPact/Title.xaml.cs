@@ -20,6 +20,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 
+using static PinkPact.Properties.Settings;
+using System.Threading;
+
 namespace PinkPact
 {
     /// <summary>
@@ -46,13 +49,24 @@ namespace PinkPact
             this.parent = parent;
             InitializeComponent();
 
-            newGameOption.Tag = (Action)(() => MessageBox.Show("oh boy i sure hope there was some interesting lore here"));
+            newGameOption.Tag = (Action)(async () =>
+            {
+                HotkeyManager.Disable("title");
+
+                var a = new DayOne(parent);
+                parent.ui_layer.IsHitTestVisible = false;
+
+                await OpacityProperty.Animate<DoubleAnimation, double>(this, Opacity, 0, 1000, 12, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+
+                await parent.game_layer.Children.Add(a);
+                await a.Day1();
+            });
             continueOption.Tag = (Action)(() => MessageBox.Show("continue"));
             settingsOption.Tag = (Action)(() => MessageBox.Show("no settings yet, sorry"));
             //Loaded += (_, __) => _ = Show();
         }
 
-        public async Task Show()
+        public async Task ShowLogo()
         {
             parent.ui_layer.Effect = new MonitorFilmEffect() 
             { 
@@ -66,18 +80,28 @@ namespace PinkPact
             logo.Visibility = Visibility.Visible;
             logo.Opacity = 0;
 
-            _ = TranslateTransform.YProperty.Animate<DoubleAnimation, double>(logoTranslation, 20, 0, fadeDuration, 5, easing: new QuinticEase() { EasingMode = EasingMode.EaseOut });
-            _ = OpacityProperty.Animate<DoubleAnimation, double>(logo, 0, 1, fadeDuration, 5, easing: new SineEase());
-            _ = MonitorFilmEffect.IntensityProperty.Animate<DoubleAnimation, double>(parent.ui_layer.Effect, 0.3, 0, fadeDuration * 3, easing: new ElasticEase() { EasingMode = EasingMode.EaseOut });
-            _ = MonitorFilmEffect.StretchFactorsProperty.Animate<PointAnimation, Point>(new Point(0.5, 0.5), new Point(1, 1), fadeDuration * 3, easing: new ElasticEase() { EasingMode = EasingMode.EaseOut });
-            
-            await fadeDuration;
 
-            // Shine
-            await TranslateTransform.XProperty.Animate<DoubleAnimation, double>(shineTranslation, -250, 1050, shineDuration, 10, easing: new QuinticEase() { EasingMode = EasingMode.EaseInOut });
+            var token = new CancellationTokenSource();
+            HotkeyManager.Add("logo", () => { token.Cancel(); HotkeyManager.Remove("logo"); }, Key.Enter);
+            try
+            {
+                _ = TranslateTransform.YProperty.Animate<DoubleAnimation, double>(logoTranslation, 20, 0, fadeDuration, 5, easing: new QuinticEase() { EasingMode = EasingMode.EaseOut });
+                _ = OpacityProperty.Animate<DoubleAnimation, double>(logo, 0, 1, fadeDuration, 5, easing: new SineEase());
+                _ = MonitorFilmEffect.IntensityProperty.Animate<DoubleAnimation, double>(parent.ui_layer.Effect, 0.3, 0, fadeDuration * 3, easing: new ElasticEase() { EasingMode = EasingMode.EaseOut });
+                _ = MonitorFilmEffect.StretchFactorsProperty.Animate<PointAnimation, Point>(new Point(0.5, 0.5), new Point(1, 1), fadeDuration * 3, easing: new ElasticEase() { EasingMode = EasingMode.EaseOut });
 
-            // Fade out
-            await OpacityProperty.Animate<DoubleAnimation, double>(logo, logo.Opacity, 0, fadeDuration, 5, easing: new SineEase());
+                await Task.Delay(fadeDuration, token.Token);
+
+                // Shine
+                await TranslateTransform.XProperty.Animate<DoubleAnimation, double>(shineTranslation, -250, 1050, shineDuration, 10, easing: new QuinticEase() { EasingMode = EasingMode.EaseInOut }, cancelToken: token.Token);
+
+                // Fade out
+                await OpacityProperty.Animate<DoubleAnimation, double>(logo, logo.Opacity, 0, fadeDuration, 5, easing: new SineEase());
+            }
+            catch // Force fade out
+            {
+                await OpacityProperty.Animate<DoubleAnimation, double>(logo, logo.Opacity, 0, fadeDuration, 5, easing: new SineEase());
+            }
 
             // Value enforcement
 
@@ -103,8 +127,26 @@ namespace PinkPact
 
             // Animate it into appearance
 
+            titleBg.RenderTransform = new TranslateTransform();
+            _ = TranslateTransform.YProperty.Animate<DoubleAnimation, double>(titleBg.RenderTransform, 15, 0, 3000, 20, easing: new SineEase());
             await OpacityProperty.Animate<DoubleAnimation, double>(titleGrid, 0, 0.9, 3000, 5, false, easing: new SineEase());
             await 1000;
+
+            // Show notification window
+
+            var notif = ResourceHelper.GetImageResource("Resources/Others/notification.png");
+
+            notif.Width = 500;
+            notif.Opacity = 0;
+            notif.VerticalAlignment = VerticalAlignment.Bottom;
+            notif.HorizontalAlignment = HorizontalAlignment.Left;
+            notif.Margin = new Thickness(40, 0, 0, 40);
+            notif.RenderTransform = new TranslateTransform();
+            notif.IsHitTestVisible = false;
+
+            _ = titleGrid.Children.Add(notif);
+            _ = TranslateTransform.YProperty.Animate<DoubleAnimation, double>(notif.RenderTransform, 20, 0, 250, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+            await OpacityProperty.Animate<DoubleAnimation, double>(notif, 0, 1, 250, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
 
             // Wait for the grid to be clicked
 
@@ -194,7 +236,6 @@ namespace PinkPact
             parent.ui_layer.Children.Remove(wnd);
 
             // For the next 10 seconds, fill the screen with error windows
-
             double dtime = 250;
             int totalMs = 0,
                 time = 1000;
@@ -280,30 +321,11 @@ namespace PinkPact
 
             titleGrid.Visibility = Visibility.Collapsed;
 
-            // Show notification
-
-            await 2500;
-            notifScreen.Visibility = Visibility.Visible;
-
-            _ = OpacityProperty.Animate<DoubleAnimation, double>(heartImg, 0, 1, 200, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
-            _ = ScaleTransform.ScaleXProperty.Animate<DoubleAnimation, double>(heartImg.RenderTransform, 0, 1, 250, easing: new BackEase() { Amplitude = 0.75, EasingMode = EasingMode.EaseOut });
-            await ScaleTransform.ScaleYProperty.Animate<DoubleAnimation, double>(0, 1, 250, easing: new BackEase() { Amplitude = 0.75, EasingMode = EasingMode.EaseOut });
-
-            likeNotif.Opacity = 1;
-            await likeNotif.SetAsync(likeNotif.GetFormattedText());
-
-            // Fade out notification
-
-            await 2500;
-            _ = OpacityProperty.Animate<DoubleAnimation, double>(notifScreen, 1, 0, 250, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
-            await TranslateTransform.YProperty.Animate<DoubleAnimation, double>(notifScreen.RenderTransform, 0, 50, 300, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
-
             // Remove everything but the title
 
             await 2000;
-            viewport.Children.Remove(logo);
-            viewport.Children.Remove(notifScreen);
             titleGrid.Children.Remove(titleBg);
+            titleGrid.Children.Remove(notif);
 
             actualTitleBg.Visibility = Visibility.Visible;
 
@@ -353,41 +375,42 @@ namespace PinkPact
             heartsieAnim.BeginTime = TimeSpan.FromSeconds(1);
             titleHeart2.RenderTransform.BeginAnimation(TranslateTransform.YProperty, heartsieAnim);
 
+            titleGrid.Children.Remove(titleBg);
             titleGrid.Visibility = Visibility.Visible;
             actualTitleGrid.Visibility = Visibility.Visible;
+            actualTitleBg.Visibility = Visibility.Visible;
 
             foreach (StackPanel opt in optionGrid.Children) (opt.Children[1] as Image).Source = new BitmapImage(new Uri("pack://application:,,,/PinkPact;component/Resources/Title/title_arrow.png", UriKind.RelativeOrAbsolute));
 
-            // TEMPORARY
             ToggleMenuOption(1);
-
             _ = SelectMenuOption(0, false);
-            Func<Key[], bool> pred = _ => actualTitleGrid.Visibility == Visibility.Visible;
-
-            HotkeyManager.Add("menuUp", MenuUp, pred, Key.Up);
-            HotkeyManager.Add("menuUp", MenuUp, pred, Key.W);
-
-            HotkeyManager.Add("menuDown", MenuDown, pred, Key.Down);
-            HotkeyManager.Add("menuDown", MenuDown, pred, Key.S);
-
-            HotkeyManager.Add("menuConfirm", () => (selected.Tag as Action)(), Key.Enter);
 
             if (fadeIn)
             {
                 foreach (StackPanel opt in optionGrid.Children) opt.Opacity = 0;
-                
+
                 _ = OpacityProperty.Animate<DoubleAnimation, double>(titleGrid, 0, 1, 2000, 5, easing: new SineEase());
                 _ = OpacityProperty.Animate<DoubleAnimation, double>(actualTitleGrid, 0, 1, 2000, 5, easing: new SineEase());
 
                 await 1000;
                 foreach (StackPanel opt in optionGrid.Children)
                 {
-                    _ = OpacityProperty.Animate<DoubleAnimation, double>(opt, 0, 1, 500, 24, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
+                    _ = OpacityProperty.Animate<DoubleAnimation, double>(opt, 0, opt.IsEnabled ? 1 : 0.5, 500, 24, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
                     _ = TranslateTransform.XProperty.Animate<DoubleAnimation, double>((opt.RenderTransform as TransformGroup).Children[0], -50, 0, 500, 24, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
 
                     await 150;
                 }
             }
+
+            Func<Key[], bool> pred = _ => actualTitleGrid.Visibility == Visibility.Visible;
+
+            HotkeyManager.Add("title", MenuUp, pred, Key.Up);
+            HotkeyManager.Add("title", MenuUp, pred, Key.W);
+
+            HotkeyManager.Add("title", MenuDown, pred, Key.Down);
+            HotkeyManager.Add("title", MenuDown, pred, Key.S);
+
+            HotkeyManager.Add("title", () => (selected.Tag as Action)(), Key.Enter);
         }
 
         public int SelectMenuOption(int index, bool up)

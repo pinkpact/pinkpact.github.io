@@ -168,7 +168,7 @@
                       RenderTransformOrigin="0.5,0.5"
                       Background="Transparent">
 
-                    <ctr:FormattedTextBlock x:Name="format"
+                    <!--<ctr:FormattedTextBlock x:Name="format"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
                                         Text="THE (w8,ff`Mini Pixel-7`,c#ff0048-#ff0000,lff`SD Auto Pilot`)[PINK] PACT"
@@ -182,7 +182,7 @@
                                                 X="0"
                                                 Y="0"/>
                         </ctr:FormattedTextBlock.RenderTransform>
-                    </ctr:FormattedTextBlock>
+                    </ctr:FormattedTextBlock>-->
 
                 </Grid>
 

@@ -86,6 +86,8 @@ namespace PinkPact
             await viewport.Children.Add(letter);
             await viewport.Children.Add(msg);
 
+            Audio.PlayResource("Resources/Sounds/Extra/letter_appear.mp3");
+
             _ = OpacityProperty.Animate<DoubleAnimation, double>(msg, 0, 1, 300, 45, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
             await TranslateTransform.YProperty.Animate<DoubleAnimation, double>(msg.RenderTransform, 0, -50, 300, 60, true, true, easing: new SineEase() { EasingMode = EasingMode.EaseOut });
 

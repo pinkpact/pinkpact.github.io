@@ -39,6 +39,8 @@ namespace PinkPact
 
         public MainWindow()
         {
+            AppDomain.CurrentDomain.UnhandledException += (o, e) => MessageBox.Show((e.ExceptionObject as Exception).Message + "\n\n" + (e.ExceptionObject as Exception).StackTrace, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
             AudioChannel.RegisterChannel("sfx");
             AudioChannel.RegisterChannel("music");
 

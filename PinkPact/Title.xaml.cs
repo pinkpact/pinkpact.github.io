@@ -22,6 +22,7 @@ using System.Diagnostics;
 
 using static PinkPact.Properties.Settings;
 using System.Threading;
+using PinkPact.Playback;
 
 namespace PinkPact
 {
@@ -52,6 +53,7 @@ namespace PinkPact
             newGameOption.Tag = (Action)(async () =>
             {
                 HotkeyManager.Disable("title");
+                Audio.PlayResource("Resources/Sounds/Extra/newgame.mp3", channel: "sfx").Dispose();
 
                 var a = new DayOne(parent);
                 parent.ui_layer.IsHitTestVisible = false;
@@ -80,6 +82,7 @@ namespace PinkPact
             logo.Visibility = Visibility.Visible;
             logo.Opacity = 0;
 
+            Audio.PlayResource("Resources/Sounds/Extra/intro_sound.mp3", channel: "sfx").Dispose();
 
             var token = new CancellationTokenSource();
             HotkeyManager.Add("logo", () => { token.Cancel(); HotkeyManager.Remove("logo"); }, Key.Enter);
@@ -150,6 +153,8 @@ namespace PinkPact
 
             // Wait for the grid to be clicked
 
+            Audio.PlayResource("Resources/Sounds/Extra/notification.mp3").Dispose();
+
             parent.ui_layer.IsHitTestVisible = false;
             Cursor = Cursors.Hand;
             await this.AwaitClick();
@@ -170,6 +175,8 @@ namespace PinkPact
 
             titleVignette.Intensity = 0.6;
             await 1000;
+
+            Audio.PlayResource("Resources/Sounds/Extra/glitch.mp3").Dispose();
 
             // Weaken the glitch and begin shaking and constant glitching
 
@@ -219,6 +226,7 @@ namespace PinkPact
 
             var wnd = new PinkWindow() { Title = "ERROR", WindowContent = new PinkErrorWindow(), Tag = "errwnd" };
             wnd.ExitButton.IsEnabled = false;
+            Audio.PlayResource("Resources/Sounds/Extra/wnd_appear.mp3", channel: "sfx").Dispose();
 
             _ = parent.ui_layer.Children.Add(wnd);
             _ = wnd.Shake(5, 200);
@@ -259,6 +267,7 @@ namespace PinkPact
 
                 wnd.ExitButton.IsEnabled = false;
 
+                Audio.PlayResource("Resources/Sounds/Extra/wnd_appear.mp3", channel: "sfx").Dispose();
                 _ = parent.ui_layer.Children.Add(wnd);
                 _ = wnd.Shake(5, 200);
 
@@ -286,6 +295,9 @@ namespace PinkPact
                     await 250;
                     continue;
                 }
+
+                if (i == 2) Audio.PlayResource("Resources/Sounds/Extra/tension.mp3").Dispose();
+
 
                 // Await and reduce waiting time and increase effects
 
@@ -468,12 +480,14 @@ namespace PinkPact
 
         void MenuUp()
         {
+            Audio.PlayResource("Resources/Sounds/Extra/click.mp3", channel: "sfx").Dispose();
             for (int i = 0; i < (lastUp ? 1 : 3); i++) selectedMenuOption = SelectMenuOption(selectedMenuOption, true) - 1;
             lastUp = true;
         }
 
         void MenuDown()
         {
+            Audio.PlayResource("Resources/Sounds/Extra/click.mp3", channel: "sfx").Dispose();
             for (int i = 0; i < (lastUp ? 3 : 1); i++) selectedMenuOption = SelectMenuOption(selectedMenuOption, false) + 1;
             lastUp = false;
         }
